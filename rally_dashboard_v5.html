@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SAGA RALLY 2026 取材管理 v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090c;--bg1:#0c1018;--bg2:#111820;--bg3:#18222c;--bg4:#1e2a36;
+  --line:#1c2830;--line2:#243040;
+  --red:#e8281e;--red2:#ff4438;--orange:#f07828;--gold:#e8a800;
+  --cyan:#00c8e8;--green:#00d46a;--purple:#8868e8;
+  --t0:#eef2f6;--t1:#8898a8;--t2:#445058;--t3:#28363e;
+  --mono:'JetBrains Mono',monospace;--cond:'Barlow Condensed',sans-serif;--sans:'Noto Sans JP',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t0)}
+body{font-family:var(--sans);display:flex;flex-direction:column}
+
+/* HEADER */
+.hdr{flex-shrink:0;height:50px;background:var(--bg1);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:50}
+.hdr-logo{font-family:var(--cond);font-weight:800;font-size:20px;letter-spacing:.05em;line-height:1}
+.hdr-logo b{color:var(--red)}
+.hdr-sub{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-top:1px}
+.hdr-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;background:rgba(232,40,30,.12);color:var(--red);border:1px solid rgba(232,40,30,.25);letter-spacing:.08em}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hdr-clock{font-family:var(--mono);font-size:11px;color:var(--t1)}
+.pip{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pip 2s ease-in-out infinite}
+@keyframes pip{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LAYOUT */
+.body{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none}
+.page.on{display:block}
+.wrap{max-width:480px;margin:0 auto;padding:12px 14px 76px}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page.on .wrap{animation:fadein .3s ease}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;height:54px;background:rgba(7,9,12,.97);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;z-index:200}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--t2);transition:color .15s;position:relative}
+.ni.on{color:var(--red)}
+.ni.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--red);border-radius:0 0 2px 2px}
+.ni-ico{font-size:18px;line-height:1}.ni-lbl{font-size:9px;font-weight:500;letter-spacing:.04em}
+
+/* SECTIONS */
+.sh{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
+.sh-txt{font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.15em;color:var(--t1);white-space:nowrap;text-transform:uppercase}
+.sh-line{flex:1;height:1px;background:var(--line)}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.ir{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 12px;border-bottom:1px solid rgba(28,40,48,.6)}
+.ir:last-child{border-bottom:none}
+.ir-k{font-size:11px;color:var(--t1);flex-shrink:0;margin-right:8px}
+.ir-v{font-family:var(--mono);font-size:11px;color:var(--t0);text-align:right;word-break:break-all}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0a1520,#08101a);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:6px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+.hero::after{content:'SAGA';position:absolute;right:-8px;top:-10px;font-family:var(--cond);font-size:88px;font-weight:800;color:rgba(232,40,30,.04);pointer-events:none;line-height:1}
+.hero-rd{font-family:var(--mono);font-size:10px;color:var(--t1);letter-spacing:.1em;margin-bottom:3px}
+.hero-name{font-family:var(--cond);font-size:22px;font-weight:800;letter-spacing:.04em;margin-bottom:8px}
+.hero-name b{color:var(--red)}
+.hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.hm{font-family:var(--mono);font-size:10px;color:var(--t1)}.hm span{color:var(--cyan)}
+.cd-lbl{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.12em;margin-bottom:6px}
+.cd-row{display:flex;gap:6px;align-items:center}
+.cd-b{background:var(--bg3);border:1px solid var(--line2);border-radius:4px;padding:5px 10px;text-align:center;min-width:46px}
+.cd-n{font-family:var(--cond);font-size:26px;font-weight:700;color:var(--gold);line-height:1;display:block}
+.cd-u{font-size:8px;color:var(--t2);letter-spacing:.1em;margin-top:1px}
+.cd-sep{font-family:var(--cond);font-size:20px;font-weight:700;color:var(--t3)}
+
+/* PROGRESS */
+.prog-wrap{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.prog-card{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:10px;text-align:center}
+.prog-num{font-family:var(--cond);font-size:28px;font-weight:800;line-height:1;margin-bottom:2px}
+.prog-lbl{font-size:9px;color:var(--t1);letter-spacing:.04em}
+
+/* ALERTS */
+.al{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:5px;margin-bottom:7px;border:1px solid}
+.al-r{background:rgba(232,40,30,.07);border-color:rgba(232,40,30,.25)}
+.al-g{background:rgba(232,168,0,.05);border-color:rgba(232,168,0,.2)}
+.al-b{background:rgba(0,200,232,.04);border-color:rgba(0,200,232,.15)}
+.al-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dr{background:var(--red)}.dg{background:var(--gold)}.db{background:var(--cyan)}
+.al-body{flex:1}.al-t{font-size:12px;font-weight:500;line-height:1.5}
+.al-d{font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:2px}
+
+/* PHASE GRID */
+.phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.pc{background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:10px}
+.pc.done{background:#0a140c;border-color:#1a2e1a}
+.pc.warn{border-color:rgba(232,168,0,.4);background:rgba(232,168,0,.04)}
+.pc.wait{opacity:.65}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.pc-id{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--t2)}
+.pc.done .pc-id{color:var(--green)}.pc.warn .pc-id{color:var(--gold)}
+.badge{font-family:var(--mono);font-size:8px;letter-spacing:.08em;padding:1px 5px;border-radius:2px}
+.bd{background:rgba(0,212,106,.12);color:var(--green);border:1px solid rgba(0,212,106,.2)}
+.bw{background:rgba(232,168,0,.12);color:var(--gold);border:1px solid rgba(232,168,0,.2)}
+.bo{background:var(--bg4);color:var(--t2);border:1px solid var(--line2)}
+.pc-ttl{font-size:11px;line-height:1.4;margin-bottom:6px}
+.pc.done .pc-ttl{color:var(--t1)}
+.bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.bar-f{height:100%;border-radius:2px}
+.bf-g{background:var(--green)}.bf-o{background:var(--gold)}.bf-x{background:var(--t3)}
+
+/* TASKS */
+.task-card{background:var(--bg2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.ti{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(28,40,48,.5);cursor:pointer;transition:background .1s;-webkit-user-select:none;user-select:none}
+.ti:last-child{border-bottom:none}
+.ti:active{background:var(--bg3)}
+.ti.ck{background:#0a140c}
+.ti.ck .ti-txt{color:var(--t2);text-decoration:line-through}
+.ti-chk{width:18px;height:18px;border-radius:3px;border:1.5px solid var(--line2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ti.ck .ti-chk{background:var(--green);border-color:var(--green)}
+.ti.ck .ti-chk::after{content:'✓';font-size:11px;color:#000;font-weight:700}
+.ti-body{flex:1}
+.ti-id{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.05em;margin-bottom:2px}
+.ti-txt{font-size:12px;line-height:1.5;color:var(--t0)}
+.ti-sub{font-size:10px;color:var(--t1);margin-top:2px;line-height:1.5}
+.ti-dl{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;flex-shrink:0;margin-top:2px;white-space:nowrap}
+.dl-r{background:rgba(232,40,30,.12);color:var(--red)}.dl-g{background:rgba(232,168,0,.1);color:var(--gold)}
+.dl-ok{background:rgba(0,212,106,.1);color:var(--green)}.dl-x{background:var(--bg4);color:var(--t2)}
+.ti.locked{opacity:.4;pointer-events:none}
+.task-note{font-size:10px;color:var(--t1);padding:8px 12px;background:rgba(0,0,0,.2);border-top:1px solid var(--line);line-height:1.6}
+
+/* SS TABLE */
+.ss-tbl{background:var(--bg2);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.ss-hdr{display:grid;grid-template-columns:38px 1fr 54px 54px 56px;background:var(--bg3);border-bottom:1px solid var(--line);padding:6px 10px;gap:4px}
+.ss-hdr div{font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.06em}
+.ss-row{display:grid;grid-template-columns:38px 1fr 54px 54px 56px;padding:8px 10px;gap:4px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center}
+.ss-row:last-child{border-bottom:none}
+.ss-row.hl{background:rgba(232,40,30,.04)}
+.ss-no{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--red)}
+.ss-nm{font-size:11px;line-height:1.3}.ss-nm small{font-size:9px;color:var(--purple);display:block}
+.ss-t{font-family:var(--mono);font-size:10px;color:var(--gold)}
+.ss-lim{font-family:var(--mono);font-size:10px;color:var(--red)}
+.ss-d{font-family:var(--mono);font-size:10px;color:var(--t1)}
+.svc-row{padding:6px 10px;background:rgba(0,200,232,.03);border-bottom:1px solid rgba(28,40,48,.4);font-family:var(--mono);font-size:10px;color:var(--cyan);text-align:center}
+
+/* PLAYERS */
+.plr{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid rgba(28,40,48,.4);cursor:pointer;transition:background .1s}
+.plr:last-child{border-bottom:none}
+.plr:active{background:var(--bg3)}
+.plr-no{font-family:var(--cond);font-size:22px;font-weight:800;color:var(--red);line-height:1;min-width:28px;padding-top:2px}
+.plr-cls{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px;flex-shrink:0;margin-top:3px}
+.c1{background:rgba(232,40,30,.15);color:var(--red)}.c3{background:rgba(0,200,232,.12);color:var(--cyan)}
+.c3m{background:rgba(232,168,0,.12);color:var(--gold)}.c4{background:rgba(240,120,40,.12);color:var(--orange)}
+.c5{background:rgba(0,212,106,.12);color:var(--green)}.cx{background:rgba(136,104,232,.12);color:var(--purple)}
+.plr-info{flex:1}.plr-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.plr-sub{font-size:10px;color:var(--t1);line-height:1.5}.plr-note{font-size:10px;color:var(--gold);margin-top:2px}
+.plr-r{text-align:right;flex-shrink:0}.plr-015{font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:3px}
+.plr-arr{font-size:10px;color:var(--t2)}
+
+/* RESULTS */
+.rc-hdr{background:var(--bg3);padding:7px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.rc-cls{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--red)}
+.rc-st{font-size:10px;color:var(--t1)}
+.rrow{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid rgba(28,40,48,.4)}
+.rrow:last-child{border-bottom:none}
+.rpos{font-family:var(--cond);font-size:18px;font-weight:700;min-width:22px}
+.rp1{color:var(--gold)}.rp2{color:#b0b8c0}.rp3{color:#b08040}
+.rname{font-size:12px;font-weight:600;margin-bottom:1px}.rcar{font-size:10px;color:var(--t1)}
+.rtimes{margin-left:auto;text-align:right}
+.rtime{font-family:var(--mono);font-size:11px}.rdiff{font-family:var(--mono);font-size:10px;color:var(--t1)}
+.rincar{width:30px;height:30px;border-radius:4px;background:var(--bg4);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:all .15s}
+.rincar:active{background:var(--bg3);border-color:var(--cyan)}
+
+/* TOOLS */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.tb{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s}
+.tb:active{transform:scale(.95);border-color:var(--cyan)}
+.tb-ico{font-size:22px;margin-bottom:5px}.tb-lbl{font-size:10px;color:var(--t1);line-height:1.3}
+
+/* POINT TABLE */
+.pt-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-bottom:8px}
+.pt-tbl th{background:var(--bg3);padding:5px 4px;text-align:center;color:var(--t1);font-size:8px;letter-spacing:.04em;border:1px solid var(--line)}
+.pt-tbl td{padding:5px 4px;text-align:center;border:1px solid var(--line);color:var(--t0)}
+.pt-tbl tr:nth-child(even) td{background:rgba(28,40,48,.3)}
+.pt-tbl .hl td{background:rgba(232,168,0,.06)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
+.overlay.on{display:flex}
+.sheet{background:var(--bg1);border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;width:100%;max-width:480px;margin:0 auto;padding:16px 14px 28px;animation:slideup .25s ease forwards;transform:translateY(100%);max-height:85vh;overflow-y:auto}
+@keyframes slideup{to{transform:translateY(0)}}
+.mhandle{width:32px;height:3px;background:var(--line2);border-radius:2px;margin:0 auto 14px}
+.mtitle{font-family:var(--cond);font-size:18px;font-weight:700;margin-bottom:14px;letter-spacing:.04em}
+.mform label{display:block;font-size:10px;font-weight:500;color:var(--t1);letter-spacing:.07em;margin:12px 0 4px}
+.mform input,.mform select,.mform textarea{width:100%;background:var(--bg3);border:1px solid var(--line2);border-radius:4px;padding:9px 10px;color:var(--t0);font-family:var(--sans);font-size:12px;outline:none;-webkit-appearance:none}
+.mform textarea{resize:vertical;min-height:160px;font-family:var(--mono);font-size:11px;line-height:1.7}
+.mform input:focus,.mform select:focus,.mform textarea:focus{border-color:var(--red)}
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.mbtns.single{grid-template-columns:1fr}
+.btn-c{background:var(--bg3);border:1px solid var(--line2);border-radius:4px;padding:11px;color:var(--t1);font-size:12px;cursor:pointer;font-family:var(--sans)}
+.btn-p{background:var(--red);border:none;border-radius:4px;padding:11px;color:#fff;font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer}
+.btn-p:active{background:var(--red2)}
+.copy-ok{display:none;text-align:center;font-family:var(--mono);font-size:11px;color:var(--green);margin-top:8px}
+.ms-banner{background:rgba(136,104,232,.07);border:1px solid rgba(136,104,232,.3);border-radius:5px;padding:11px 12px;margin-bottom:10px;display:flex;gap:10px}
+.ms-body{flex:1}.ms-t{font-size:11px;font-weight:600;color:var(--purple);letter-spacing:.04em;margin-bottom:3px}
+.ms-s{font-size:11px;color:var(--t1);line-height:1.5}
+.ms-btn{width:100%;background:rgba(136,104,232,.12);border:1px solid rgba(136,104,232,.35);border-radius:5px;padding:11px;color:var(--purple);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;margin-top:6px}
+.ms-done{background:rgba(0,212,106,.08);border-color:rgba(0,212,106,.25);color:var(--green)}
+.notice{font-size:10px;color:var(--t2);text-align:center;padding:6px 0}
+
+/* SERIES CALENDAR */
+.rds-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(28,40,48,.4)}
+.rds-row:last-child{border-bottom:none}
+.rds-row[onclick]:hover{background:rgba(255,255,255,.03)}
+.rds-row[onclick] .rd-name::after{content:" ↗";font-size:9px;color:var(--t2);margin-left:4px}
+.done-rd{opacity:.5}
+.now-rd{background:rgba(232,40,30,.04)}
+.next-rd{background:rgba(0,200,232,.03)}
+.rd-no{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--t2);min-width:32px;flex-shrink:0}
+.now-rd .rd-no{color:var(--red)}.next-rd .rd-no{color:var(--cyan)}
+.rd-body{flex:1}
+.rd-name{font-size:12px;font-weight:600;margin-bottom:1px}
+.rd-meta{font-family:var(--mono);font-size:9px;color:var(--t2)}
+.rd-st{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:2px;flex-shrink:0;white-space:nowrap}
+.done-badge{background:rgba(68,80,88,.2);color:var(--t2)}
+.now-badge{background:rgba(232,40,30,.15);color:var(--red);border:1px solid rgba(232,40,30,.3)}
+.next-badge{background:rgba(0,200,232,.12);color:var(--cyan);border:1px solid rgba(0,200,232,.25)}
+.fut-badge{background:var(--bg4);color:var(--t2)}
+.gravel{background:rgba(136,104,232,.12);color:var(--purple)}
+
+/* RANKING */
+.rk-hdr{display:grid;grid-template-columns:28px 1fr 44px 44px 52px;padding:5px 10px;gap:4px;background:var(--bg3);border-bottom:1px solid var(--line)}
+.rk-hdr div{font-family:var(--mono);font-size:8px;color:var(--t2);letter-spacing:.06em;text-align:center}
+.rk-hdr div:nth-child(2){text-align:left}
+.rk-row{display:grid;grid-template-columns:28px 1fr 44px 44px 52px;padding:8px 10px;gap:4px;border-bottom:1px solid rgba(28,40,48,.35);align-items:center}
+.rk-row:last-child{border-bottom:none}
+.rk-1st{background:rgba(232,168,0,.05)}
+.rk-2nd{background:rgba(180,188,192,.03)}
+.rk-3rd{background:rgba(176,128,64,.03)}
+.rk-pos{font-family:var(--cond);font-size:15px;font-weight:700;color:var(--t2);text-align:center}
+.rk-1st .rk-pos{color:var(--gold)}
+.rk-2nd .rk-pos{color:#b0b8c0}
+.rk-3rd .rk-pos{color:#b08040}
+.rk-name{font-size:12px;font-weight:600;color:var(--t0)}
+.rk-pt{font-family:var(--mono);font-size:11px;color:var(--green);text-align:center}
+.rk-tbd{color:var(--t3)}
+.rk-total{font-family:var(--cond);font-size:16px;font-weight:700;color:var(--gold);text-align:center}
+
+/* CO-DRIVER CHANGE */
+.co-chg-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(28,40,48,.4)}
+.co-chg-row:last-child{border-bottom:none}
+.co-no{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--t1);min-width:26px;flex-shrink:0}
+.co-cls{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px;flex-shrink:0}
+.co-body{flex:1}
+.co-dr{font-size:12px;font-weight:700;margin-bottom:3px}
+.co-detail{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px}
+.co-old{color:var(--t2);text-decoration:line-through}
+.co-arr{color:var(--gold)}
+.co-new{color:var(--gold);font-weight:600}
+
+/* ENTRY LIST */
+.el-hdr{display:grid;grid-template-columns:32px 1fr 1fr 72px;padding:5px 10px;gap:6px;background:var(--bg3);border-bottom:1px solid var(--line)}
+.el-hdr div{font-family:var(--mono);font-size:8px;color:var(--t2);letter-spacing:.06em}
+.el-row{display:grid;grid-template-columns:32px 1fr 1fr 72px;padding:7px 10px;gap:6px;border-bottom:1px solid rgba(28,40,48,.35);align-items:center}
+.el-row:last-child{border-bottom:none}
+.el-015{background:rgba(232,40,30,.03)}
+.el-changed{background:rgba(232,168,0,.04)}
+.el-no{font-family:var(--cond);font-size:14px;font-weight:700;color:var(--t2)}
+.el-015 .el-no{color:var(--red)}
+.el-dr{font-size:11px;font-weight:600;color:var(--t0);line-height:1.3}
+.el-co{font-size:10px;color:var(--t1);line-height:1.4}
+.el-car{font-size:9px;color:var(--t2);font-family:var(--mono)}
+.el-star{color:var(--gold);font-size:10px;margin-left:2px}
+.el-chg{font-family:var(--mono);font-size:8px;background:rgba(232,168,0,.15);color:var(--gold);border:1px solid rgba(232,168,0,.3);padding:1px 4px;border-radius:2px;margin-left:4px}
+.el-co-new{color:var(--gold);font-weight:600}
+.el-co-old{font-size:9px;color:var(--t2);font-family:var(--mono);display:block;text-decoration:line-through}
+
+/* WATCH SITES */
+.watch-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(28,40,48,.4);cursor:pointer;transition:background .1s}
+.watch-row:last-child{border-bottom:none}
+.watch-row:active{background:var(--bg3)}
+.watch-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 5px var(--green)}
+.watch-body{flex:1}
+.watch-name{font-size:12px;font-weight:700;margin-bottom:1px}
+.watch-url{font-family:var(--mono);font-size:9px;color:var(--cyan);margin-bottom:2px}
+.watch-desc{font-size:10px;color:var(--t1)}
+.watch-arr{font-size:10px;color:var(--t2)}
+.tag{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;display:inline-block}
+.tag-r{background:rgba(232,40,30,.12);color:var(--red)}.tag-g{background:rgba(0,212,106,.1);color:var(--green)}
+.tag-o{background:rgba(232,168,0,.1);color:var(--gold)}.tag-b{background:rgba(0,200,232,.1);color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div>
+    <div class="hdr-logo">SAGA <b>RALLY</b> 2026</div>
+    <div class="hdr-sub">JAF全日本ラリー選手権 第２戦 取材管理</div>
+  </div>
+  <div class="hdr-badge">T26056</div>
+  <div class="hdr-r"><div class="pip"></div><div class="hdr-clock" id="hclock">--:--</div></div>
+</header>
+
+
+<!-- 公式通知バナー -->
+<div style="background:linear-gradient(90deg,#1a0800,#0d1200);border-bottom:2px solid #e8281e;padding:6px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;font-family:var(--mono)">
+  <span style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:2px;white-space:nowrap;letter-spacing:.08em">公式通知 No.1</span>
+  <span style="color:#ffb0a0;font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">301.48km確定 | MediaSafety Ver.1.8入手済み✅ | メディアポイント全SS解析完了 | 006タスク実行中</span>
+  <span style="color:var(--green);font-size:10px;font-weight:700;white-space:nowrap">2026/3/17 確定</span>
+</div>
+<div class="body">
+
+<!-- ══ HOME ══ -->
+<div class="page on" id="p-home"><div class="wrap">
+  <div class="hero">
+    <div class="hero-rd">2026 JAF全日本ラリー選手権 第２戦</div>
+    <div class="hero-name">SAGA <b>RALLY</b> 2026</div>
+    <div class="hero-meta">
+      <div class="hm">会場：<span>佐賀県 多久市・唐津市</span></div>
+      <div class="hm">路面：<span>ターマック</span></div>
+      <div class="hm">SS：<span>12本 102.14km → ×1.2</span></div>
+    </div>
+    <div class="cd-lbl">LEG1 スタートまで</div>
+    <div class="cd-row">
+      <div class="cd-b"><span class="cd-n" id="cd-d">--</span><div class="cd-u">DAYS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-b"><span class="cd-n" id="cd-h">--</span><div class="cd-u">HRS</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-b"><span class="cd-n" id="cd-m">--</span><div class="cd-u">MIN</div></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-b"><span class="cd-n" id="cd-s">--</span><div class="cd-u">SEC</div></div>
+    </div>
+  </div>
+
+  <div class="sh"><div class="sh-txt">PHASE PROGRESS</div><div class="sh-line"></div></div>
+  <div class="prog-wrap">
+    <div class="prog-card"><div class="prog-num" style="color:var(--green)">4</div><div class="prog-lbl">完了</div></div>
+    <div class="prog-card"><div class="prog-num" style="color:var(--gold)">3</div><div class="prog-lbl">進行中</div></div>
+    <div class="prog-card"><div class="prog-num" style="color:var(--t2)">8</div><div class="prog-lbl">未着手</div></div>
+  </div>
+  <div class="phase-grid">
+    <div class="pc done"><div class="pc-top"><div class="pc-id">001–002</div><div class="badge bd">DONE</div></div><div class="pc-ttl">スケジュール登録・情報収集</div><div class="bar"><div class="bar-f bf-g" style="width:100%"></div></div></div>
+    <div class="pc done"><div class="pc-top"><div class="pc-id">003</div><div class="badge bd">DONE</div></div><div class="pc-ttl">特別規則書解読・スケジュール確認</div><div class="bar"><div class="bar-f bf-g" style="width:100%"></div></div></div>
+    <div class="pc done"><div class="pc-top"><div class="pc-id">004</div><div class="badge bd">DONE</div></div><div class="pc-ttl">メディア登録申請・承認書受領</div><div class="bar"><div class="bar-f bf-g" style="width:100%"></div></div></div>
+    <div class="pc warn"><div class="pc-top"><div class="pc-id">005</div><div class="badge bw">URGENT</div></div><div class="pc-ttl">交通・宿泊手配</div><div class="bar"><div class="bar-f bf-o" style="width:10%"></div></div></div>
+    <div class="pc warn"><div class="pc-top"><div class="pc-id">006</div><div class="badge bw">IN PROGRESS</div></div><div class="pc-ttl">MediaSafety解読・撮影プラン</div><div class="bar"><div class="bar-f bf-o" style="width:20%"></div></div></div>
+    <div class="pc wait"><div class="pc-top"><div class="pc-id">007–015</div><div class="badge bo">WAIT</div></div><div class="pc-ttl">出発〜取材〜インカー</div><div class="bar"><div class="bar-f bf-x" style="width:0%"></div></div></div>
+  </div>
+
+  <div class="sh"><div class="sh-txt">ALERTS</div><div class="sh-line"></div></div>
+  <div class="al al-r"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">🔴 宿泊・交通の予約確定が必要</div><div class="al-d">TAQUA泊優先確認　DEADLINE：2026/04/02</div></div></div>
+  <div class="al al-b"><div class="al-dot db" style="background:var(--green)"></div><div class="al-body"><div class="al-t" style="color:var(--green)">✅ MediaSafety Ver.1.8 入手済み</div><div class="al-d">006タスク実行中 → SSメディアポイント確認・撮影プラン作成へ</div></div></div>
+  <div class="al al-r"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">✈️ JAL305 羽田07:05発 → レンタカー要予約・荷物発送3/31まで</div><div class="al-d">007タスク参照 / レンタカー：福岡空港店を今日中に予約！</div></div></div>
+  <div class="al al-b"><div class="al-dot db"></div><div class="al-body"><div class="al-t">📋 4/2 ネットプリントアップロード</div><div class="al-d">カラー：申請書　モノクロ：使用申請書・PV・保険写し</div></div></div>
+  <div class="al al-g"><div class="al-dot dg"></div><div class="al-body"><div class="al-t">📋 Rd.3 飛鳥 メディア申請受付中</div><div class="al-d">申請期間 3/18〜4/24　Sportity：JRC3RA2026　SAGA後すぐ申請！</div></div></div>
+  <div class="al al-r"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">⚠️ 保険期限 4/25 → Rd.3（5/8〜）は更新必須</div><div class="al-d">スマQworker CD0000264　SAGA帰宅後すぐ更新手続きを</div></div></div>
+  <div class="al al-b"><div class="al-dot db" style="background:var(--green)"></div><div class="al-body"><div class="al-t">✅ 3/31 講習テスト 100点合格済</div><div class="al-d">承認ナンバー T26056 受領済</div></div></div>
+
+  <div class="sh"><div class="sh-txt">KEY DATES</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div class="ir"><div class="ir-k">3/31 ✅</div><div class="ir-v" style="color:var(--green)">講習テスト合格済</div></div>
+    <div class="ir"><div class="ir-k">4/2</div><div class="ir-v" style="color:var(--gold)">ネットプリントUP・ルート検索保存</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--red)">4/3 05:35</div><div class="ir-v" style="color:var(--red)">起床 / JAL305 羽田07:05発</div></div>
+    <div class="ir"><div class="ir-k">4/3 08:55</div><div class="ir-v">福岡着 → レンタカー → 多久市</div></div>
+    <div class="ir"><div class="ir-k">4/3 11:00</div><div class="ir-v">メディア受付・ブリーフィング</div></div>
+    <div class="ir"><div class="ir-k">4/3 BF後</div><div class="ir-v">メディアレキ → LEG1ルート確定</div></div>
+    <div class="ir"><div class="ir-k">4/4</div><div class="ir-v">LEG1取材 SS1〜6</div></div>
+    <div class="ir"><div class="ir-k">4/5</div><div class="ir-v">LEG2取材 SS7〜12</div></div>
+    <div class="ir"><div class="ir-k">4/5 暫定+30分後</div><div class="ir-v" style="color:var(--gold)">015 インカー依頼送信</div></div>
+    <div class="ir"><div class="ir-k">水曜夜</div><div class="ir-v" style="color:var(--t1)">インカー受取締切</div></div>
+  </div>
+
+
+  <!-- シリーズカレンダー -->
+  <div class="sh"><div class="sh-txt">2026 全日本ラリー シリーズカレンダー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rds-row done-rd" onclick="window.open('https://rally-mikawawan.com/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.1</div><div class="rd-body"><div class="rd-name">RALLY三河湾 2026</div><div class="rd-meta">2/27〜3/1　愛知　舗装　250km　<span style="color:var(--cyan)">JRC1RM2026</span></div></div><div class="rd-st done-badge">完了</div></div>
+    <div class="rds-row now-rd" onclick="window.open('https://gravelmotorsportsclub.com/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.2</div><div class="rd-body"><div class="rd-name">SAGA RALLY 2026</div><div class="rd-meta">4/3〜5　佐賀　舗装　350km　<span style="color:var(--cyan)">JRC2SR2026</span></div><div class="rd-apply" style="color:var(--red);font-size:9px;font-family:var(--mono)">申請済 T26056</div></div><div class="rd-st now-badge">NOW</div></div>
+    <div class="rds-row next-rd" onclick="window.open('https://rallyasuka.com/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.3</div><div class="rd-body"><div class="rd-name">YUHO Rally 飛鳥</div><div class="rd-meta">5/8〜10　奈良　舗装　400km　<span style="color:var(--cyan)">JRC3RA2026</span></div><div class="rd-apply" style="color:var(--gold);font-size:9px;font-family:var(--mono)">申請期間：3/18〜4/24　締切まで31日　☎ 0771-63-6363</div></div><div class="rd-st next-badge">NEXT</div></div>
+    <div class="rds-row" onclick="window.open('https://gako.jp/mac/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.4</div><div class="rd-body"><div class="rd-name">久万高原ラリー</div><div class="rd-meta">6/19〜21　愛媛　舗装　300km　☎ 089-958-3089</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge">FUT</div></div>
+    <div class="rds-row" onclick="window.open('https://www.team-ark.jp/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.5</div><div class="rd-body"><div class="rd-name">ARK ラリー・カムイ</div><div class="rd-meta">7/10〜12　北海道　未舗装　500km　☎ 011-753-9140</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge gravel">未舗装</div></div>
+    <div class="rds-row" onclick="window.open('https://www.rally-hokkaido.com/jp/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.6</div><div class="rd-body"><div class="rd-name">RALLY HOKKAIDO ★国際</div><div class="rd-meta">9/4〜6　北海道　未舗装　700km　☎ 011-864-2003</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge gravel">未舗装</div></div>
+    <div class="rds-row" onclick="window.open('https://msccrally.com/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.7</div><div class="rd-body"><div class="rd-name">MSCCラリー in 福島伊達</div><div class="rd-meta">9/25〜27　福島　舗装　390km</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge">FUT</div></div>
+    <div class="rds-row" onclick="window.open('https://mcsc-rally.net/highland-masters/','_blank')" style="cursor:pointer"><div class="rd-no">Rd.8</div><div class="rd-body"><div class="rd-name">ラリーハイランドマスターズ</div><div class="rd-meta">10/16〜18　岐阜　舗装　400km　☎ 0263-87-9006</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge">FUT</div></div>
+    <div class="rds-row" onclick="window.open('https://rally-montre.com/','_blank')" style="cursor:pointer;border-bottom:none"><div class="rd-no">Rd.9</div><div class="rd-body"><div class="rd-name">MONTRE 2026</div><div class="rd-meta">11/20〜22　群馬　舗装　360km　☎ 027-386-4365</div><div class="rd-apply" style="color:var(--t2);font-size:9px;font-family:var(--mono)">申請期間：未定</div></div><div class="rd-st fut-badge">FUT</div></div>
+  </div>
+
+  <!-- 監視サイト -->
+  <div class="sh"><div class="sh-txt">監視サイト — 常時チェック</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="watch-row" onclick="window.open('https://www.jrca.gr.jp/','_blank')">
+      <div class="watch-dot"></div>
+      <div class="watch-body">
+        <div class="watch-name">JRCA 公式</div>
+        <div class="watch-url">jrca.gr.jp</div>
+        <div class="watch-desc">シリーズカレンダー・規則書・エントリー情報</div>
+      </div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://jgr.jp/','_blank')">
+      <div class="watch-dot"></div>
+      <div class="watch-body">
+        <div class="watch-name">JGR 公式</div>
+        <div class="watch-url">jgr.jp</div>
+        <div class="watch-desc">メディア申請・承認書・MediaSafety発行元</div>
+      </div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://jgr.jp/sched/','_blank')">
+      <div class="watch-dot" style="background:var(--gold);box-shadow:0 0 5px var(--gold)"></div>
+      <div class="watch-body">
+        <div class="watch-name">JGR メディアスケジュール <span style="font-family:var(--mono);font-size:8px;color:var(--red)">★最重要</span></div>
+        <div class="watch-url">jgr.jp/sched/</div>
+        <div class="watch-desc">申請期間・Sportityコード・主催者連絡先一覧</div>
+      </div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://playdrive.jp/','_blank')">
+      <div class="watch-dot"></div>
+      <div class="watch-body">
+        <div class="watch-name">PlayDrive</div>
+        <div class="watch-url">playdrive.jp</div>
+        <div class="watch-desc">エントリーリスト・選手情報・取材参考</div>
+      </div>
+      <div class="watch-arr">▶</div>
+    </div>
+  </div>
+
+  <!-- 主催者HP監視 -->
+  <div class="sh"><div class="sh-txt">主催者HP — 手動確認リスト</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">更新確認は手動タップ</div>
+  </div>
+  <div style="font-size:10px;color:var(--t2);padding:7px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:5px;margin-bottom:8px;line-height:1.7">
+    ⚡ 自動監視はエージェント化後に対応予定（第3戦〜）<br>
+    現在はタップして手動確認。更新があればClaude AIに報告→ダッシュボード反映。
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="watch-row" onclick="window.open('https://rally-mikawawan.com/','_blank')">
+      <div class="watch-dot" style="background:var(--t2)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.1</span> RALLY三河湾</div><div class="watch-url">rally-mikawawan.com</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://gravelmotorsportsclub.com/','_blank')">
+      <div class="watch-dot" style="background:var(--red);box-shadow:0 0 5px var(--red)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--red)">Rd.2 NOW</span> SAGA RALLY</div><div class="watch-url">gravelmotorsportsclub.com</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://rallyasuka.com/','_blank')">
+      <div class="watch-dot" style="background:var(--cyan);box-shadow:0 0 5px var(--cyan)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--cyan)">Rd.3 NEXT</span> YUHO Rally 飛鳥</div><div class="watch-url">rallyasuka.com</div><div class="watch-desc" style="color:var(--gold)">申請期間 3/18〜4/24　締切確認を！</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://gako.jp/mac/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.4</span> 久万高原ラリー</div><div class="watch-url">gako.jp/mac/</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://www.team-ark.jp/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.5</span> ARK ラリー・カムイ</div><div class="watch-url">team-ark.jp</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://www.rally-hokkaido.com/jp/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.6</span> RALLY HOKKAIDO ★国際</div><div class="watch-url">rally-hokkaido.com/jp/</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://msccrally.com/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.7</span> MSCCラリー in 福島伊達</div><div class="watch-url">msccrally.com</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" onclick="window.open('https://mcsc-rally.net/highland-masters/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.8</span> ラリーハイランドマスターズ</div><div class="watch-url">mcsc-rally.net</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+    <div class="watch-row" style="border-bottom:none" onclick="window.open('https://rally-montre.com/','_blank')">
+      <div class="watch-dot" style="background:var(--t3)"></div>
+      <div class="watch-body"><div class="watch-name"><span style="font-family:var(--mono);font-size:9px;color:var(--t2)">Rd.9</span> MONTRE 2026</div><div class="watch-url">rally-montre.com</div><div class="watch-desc">申請期間未定 → 更新を監視</div></div>
+      <div class="watch-arr">▶</div>
+    </div>
+  </div>
+  </div>
+  <div class="sh"><div class="sh-txt">CREDENTIAL</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div class="ir"><div class="ir-k">取材者</div><div class="ir-v">加藤 卓哉 / TK product</div></div>
+    <div class="ir"><div class="ir-k">承認No.</div><div class="ir-v" style="color:var(--gold)">T26056</div></div>
+    <div class="ir"><div class="ir-k">媒体区分</div><div class="ir-v">イベントタバードメディア</div></div>
+    <div class="ir"><div class="ir-k">媒体</div><div class="ir-v">JRCA Video (YouTube)</div></div>
+    <div class="ir"><div class="ir-k">発行社</div><div class="ir-v">ラリーストリーム株式会社</div></div>
+    <div class="ir"><div class="ir-k">保険</div><div class="ir-v">スマQworker CD0000264</div></div>
+    <div class="ir"><div class="ir-k">保険期限</div><div class="ir-v" style="color:var(--green)">2026/04/25 ✓有効</div></div>
+    <div class="ir"><div class="ir-k">緊急連絡</div><div class="ir-v">加藤玲子 090-7222-8568</div></div>
+    <div class="ir"><div class="ir-k">駐車場</div><div class="ir-v">ナインストーンGC駐車場</div></div>
+  </div>
+</div></div>
+
+<!-- ══ TASKS ══ -->
+<div class="page" id="p-tasks"><div class="wrap">
+
+  <!-- 004 完了 -->
+  <div class="sh"><div class="sh-txt">004 — メディア登録申請</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti ck" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">004〜004_08a</div><div class="ti-txt">JGR HPからDL→記入→署名捺印→PV実績PDF→保険確認→PDF化→メール送信→承認書受領→講習テスト合格</div></div><div class="ti-dl dl-ok">完了</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">004_09 / 004_09_01</div><div class="ti-txt">ネットプリントアップロード</div><div class="ti-sub">カラー：メディア登録申請書　モノクロ：使用申請書・PV実績・保険写し</div></div><div class="ti-dl dl-g">4/2まで</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">004_10</div><div class="ti-txt">メディア受付会場到着前にプリントアウト完了するようリマインダー登録</div></div><div class="ti-dl dl-g">4/2まで</div></div>
+  </div>
+
+  <!-- 005 -->
+  <div class="sh"><div class="sh-txt">005 — 交通・宿泊手配</div><div class="sh-line"></div></div>
+  <div class="al al-r" style="margin-bottom:8px"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">🔴 未予約　TAQUA泊を優先確認のこと</div><div class="al-d">DEADLINE : 2026/04/02 までに確定</div></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_01</div><div class="ti-txt">主催者HP・JRCA HP・多久市HP・GoogleMapで情報収集</div></div><div class="ti-dl dl-g">今週中</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_02</div><div class="ti-txt">じゃらん・Booking.com・レンタカーで交通+宿泊プラン3案提示</div></div><div class="ti-dl dl-g">今週中</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_03</div><div class="ti-txt">JALアプリから事前チェックイン（4/2夜に実施）</div><div class="ti-sub">JAL305 羽田07:05発 / JAL332 福岡21:00発</div></div><div class="ti-dl dl-r">4/2夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_04</div><div class="ti-txt">出発前日にGoogleMapで交通手段を検索・保存</div></div><div class="ti-dl dl-g">4/2</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_05</div><div class="ti-txt">予約はこちら or クライアント側か調整する</div></div><div class="ti-dl dl-g">今週中</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">005_06_01</div><div class="ti-txt">⚠️ 決済前に必ず卓哉の承認を得ること</div></div><div class="ti-dl dl-r">必須</div></div>
+  </div>
+
+  <!-- 006 -->
+  <div class="sh"><div class="sh-txt">006 — MediaSafety解読・撮影プラン</div><div class="sh-line"></div></div>
+  <div class="ms-banner"><span style="font-size:20px">✅</span><div class="ms-body"><div class="ms-t" style="color:var(--green)">MediaSafety Ver.1.8 入手済み ✓</div><div class="ms-s" style="color:var(--green)">タスクがアンロックされました。006タスクを実行してください。</div></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_00</div><div class="ti-txt">MediaSafety PDFの発行を主催者HPで確認・入手</div></div><div class="ti-dl dl-r">入手待ち</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_01</div><div class="ti-txt">🔒 Itineraryを参照し各SSのMediaPointをリスト化（LEG1/LEG2別）</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_02</div><div class="ti-txt">🔒 LEG1・LEG2ごとにMediaPoint数の多いSSをランキング（撮影プラン優先度の根拠に）</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_03</div><div class="ti-txt">🔒 コースカースケジュール参照：Media Limit時刻を各SS分抽出</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_04</div><div class="ti-txt">🔒 Googleマイマップ新規作成・GPSデータでSSスタート〜ゴールをトレース・Drive保存</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_05 / 006_05_01</div><div class="ti-txt">🔒 GoogleMapでSSコースをトレース・所要時間計測</div><div class="ti-sub">⚠️ 逆走禁止 / Sweeper通過後まで移動禁止 / SSスタートからの距離を考慮</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_06</div><div class="ti-txt">🔒 撮影プラン3案作成</div><div class="ti-sub">・SS1は必ず1案に含める（006_06_03）<br>・JN-1上位3台・JN-3・JN-4・JN-5・JN-X優勝車両を考慮（006_06_04）<br>・LEG2はLEG1リザルト順の走行を考慮（006_06_05）</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_07</div><div class="ti-txt">🔒 GPSデータをGoogleMapでリスト化・「2026_SAGA」フォルダ保存・メモ欄にイベント項目入力</div></div><div class="ti-dl dl-g">入手後</div></div>
+    <div class="ti"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">006_08</div><div class="ti-txt">🔒 仮撮影プランの開始日時・場所をリマインダー登録</div></div><div class="ti-dl dl-g">入手後</div></div>
+  </div>
+  <div class="ms-btn ms-done">✅ MediaSafety Ver.1.8 入手済み — タスクアンロック済み</div>
+
+  <!-- Rd.3 申請 -->
+  <div class="sh"><div class="sh-txt">Rd.3 — YUHO Rally 飛鳥 メディア申請</div><div class="sh-line"></div></div>
+  <div class="al al-r" style="margin-bottom:8px"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">🔴 申請受付中 — 締切を確認次第対応</div><div class="al-d">5/8〜10　奈良県　舗装 400km　主催：MSC京都・大阪電気通信大学</div></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">Rd3_001</div><div class="ti-txt">申請期間：3/18〜<b>4/24</b>　Sportity：JRC3RA2026</div><div class="ti-sub">主催：SYMPHONY・OECU-AC　☎ 0771-63-6363<br>jgr.jp/sched/ で最新情報を確認</div></div><div class="ti-dl dl-r">〆4/24</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">Rd3_002</div><div class="ti-txt">第2戦SAGAの申請書類をベースにイベント名を変更して申請書類一式を作成</div><div class="ti-sub">「YUHO Rally 飛鳥 2026」に変更</div></div><div class="ti-dl dl-g">締切前</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">Rd3_003</div><div class="ti-txt"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cca1a9a8a5ad8ca6abbee2a6bc">[email&#160;protected]</a> に申請メール送信（TOOLSの申請メール作成を活用）</div></div><div class="ti-dl dl-g">締切前</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">Rd3_004</div><div class="ti-txt">JGRメディア承認書の受信確認</div></div><div class="ti-dl dl-g">申請後</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">Rd3_005</div><div class="ti-txt">保険がRd.3期間（5/8〜10）に有効か確認　スマQworker CD0000264 期限2026/4/25</div><div class="ti-sub" style="color:var(--red)">⚠️ 現在の保険は4/25まで → 第3戦には更新が必要！</div></div><div class="ti-dl dl-r">要更新</div></div>
+  </div>
+  <!-- 007 -->
+  <div class="sh"><div class="sh-txt">007 — 荷物発送 ✈️ 飛行機移動確定</div><div class="sh-line"></div><span style="font-family:var(--mono);font-size:9px;color:var(--red);white-space:nowrap">要実行！</span></div>
+  <div class="task-card">
+    <div class="al al-r" style="margin-bottom:8px"><div class="al-dot dr"></div><div class="al-body"><div class="al-t">✈️ JAL305 羽田07:05→福岡08:55 / JAL332 福岡21:00→羽田22:40</div><div class="al-d">飛行機移動確定 → 荷物発送・レンタカー・事前チェックインが必要</div></div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_01</div><div class="ti-txt">GoogleMapで福岡空港 → TAQUA（多久市）ルート検索・保存</div><div class="ti-sub">福岡空港→多久市：約1時間20分 / 08:55着 → 10:15頃TAQUA着（BF間に合う）</div></div><div class="ti-dl dl-r">4/2まで</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_02</div><div class="ti-txt">福岡空港周辺のクロネコヤマト営業所を検索してリスト化</div><div class="ti-sub">羽田空港または自宅近くの営業所から発送 → TAQUA着を4/2(木)に設定</div></div><div class="ti-dl dl-r">今日中</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_03</div><div class="ti-txt">クロネコヤマトアプリで送り状作成・発送（出発3日前 = 3/31まで）</div><div class="ti-sub">荷物到着予定：4/2(木) TAQUAへ / ⚠️ 決済前に必ず確認</div></div><div class="ti-dl dl-r">3/31まで</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_04</div><div class="ti-txt">福岡空港レンタカーを予約（08:55着に合わせた時刻で予約）</div><div class="ti-sub">トヨタ・ニッポン・Times等 / 福岡空港店は混雑するので事前予約必須</div></div><div class="ti-dl dl-r">今日中</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_05</div><div class="ti-txt">JALアプリから事前チェックイン（出発前日 = 4/2から可能）</div><div class="ti-sub">JAL305 羽田07:05発 → 4/2の夜にチェックイン完了させておく</div></div><div class="ti-dl dl-g">4/2夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">007_06</div><div class="ti-txt">4/3当日：羽田空港の出発1.5時間前アラームをセット（05:35起床）</div><div class="ti-sub">JAL305 07:05発 → 05:35起床 → 06:00出発目安</div></div><div class="ti-dl dl-g">4/2夜</div></div>
+    <div class="task-note">⚠️ 荷物発送済みの場合は007_02〜007_03にチェックを入れること<br>レンタカー予約完了後は007_04にチェックを入れること</div>
+  </div>
+
+  <!-- 008–009 -->
+  <div class="sh"><div class="sh-txt">008–009 — 取材出発・移動中 ✈️</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">008_01</div><div class="ti-txt">4/2夜：JALアプリで事前チェックイン完了・搭乗券をスクショ保存</div><div class="ti-sub">JAL305 羽田07:05発 → 福岡08:55着<br>05:35起床アラーム / 06:00羽田出発目安（モノレール利用）</div></div><div class="ti-dl dl-g">4/2夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">008_02</div><div class="ti-txt">4/3 羽田空港：預け荷物なし確認（発送済み）→ 保安検査 → 搭乗</div><div class="ti-sub">07:05発 → 08:55福岡着 → レンタカーピックアップ → 多久市へ</div></div><div class="ti-dl dl-g">4/2夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">009_01</div><div class="ti-txt">福岡空港 → レンタカーで多久市 TAQUA へ（約1時間20分）</div><div class="ti-sub">GoogleMapナビ起動 / 09:30 TAQUA到着目標 / 10:00 BF1時間前着が理想</div></div><div class="ti-dl dl-g">4/3当日</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">009_02</div><div class="ti-txt">休憩指示が出たら近辺のSA/PAの人気飲食情報を検索してプラン3案確認</div><div class="ti-sub">iPhone / AppleWatchでSA検索 → 3案を選んで立ち寄り</div></div><div class="ti-dl dl-g">4/3当日</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">009_03</div><div class="ti-txt">BF開始2時間前から注意喚起アラート（iPhone + AppleWatch）</div></div><div class="ti-dl dl-g">4/3当日</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">009_04</div><div class="ti-txt">BF会場到着30分前：書類プリントアウト確認アラート（iPhone + AppleWatch）</div></div><div class="ti-dl dl-g">4/3当日</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">009_05</div><div class="ti-txt">BF会場到着直前：Sportityを起動・新着PDFをGoogle Driveに保存<br><span style="font-size:10px;color:var(--t1)">ラリー終了まで新規データ更新時にアラート</span></div></div><div class="ti-dl dl-g">4/3到着前</div></div>
+  </div>
+
+  <!-- 010–011 -->
+  <div class="sh"><div class="sh-txt">010–011 — ブリーフィング・メディアレキ</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">010_01〜010_03</div><div class="ti-txt">ブリーフィングをiPhoneで録音→テキスト化→MediaSafetyと照合→要約をGoogle Drive保存（卓哉チェック後）</div></div><div class="ti-dl dl-g">4/3 BF後</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">011_01〜011_02</div><div class="ti-txt">BF要約 + Sportity + RallystreamTRACKINGを参照してメディアレキプラン3案作成→選択してGoogleMapナビ開始</div></div><div class="ti-dl dl-g">4/3 BF後</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">011_03〜011_04</div><div class="ti-txt">SSコース入口でGoogleMapにピンを打つ→メディアポイントで撮影想定ポイントから写真撮影</div></div><div class="ti-dl dl-g">4/3 レキ中</div></div>
+    <div class="ti" id="reki-task" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">011_05</div><div class="ti-txt">レキ終了 → GoogleMapで現在地から宿泊先ホテルへナビ開始</div></div><div class="ti-dl dl-g">4/3 レキ後</div></div>
+    <div style="padding:10px 12px;background:rgba(0,212,106,.04);border-top:1px solid rgba(28,40,48,.4)">
+      <button onclick="rekiEnd()" id="reki-btn" style="width:100%;background:rgba(0,212,106,.12);border:1px solid rgba(0,212,106,.3);border-radius:5px;padding:10px;color:var(--green);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer">
+        🏁 メディアレキ終了
+      </button>
+      <div id="reki-done" style="display:none;text-align:center;font-family:var(--mono);font-size:10px;color:var(--green);margin-top:6px">✅ レキ終了記録済み　GoogleMapでホテルへナビを開始してください</div>
+    </div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">011_06 / 011_06_01</div><div class="ti-txt">撮影写真のGPS情報 + GoogleMapピン + 翌日天気予報を合わせてLEG1撮影プラン3案提示</div><div class="ti-sub">Media Latest ST時刻の1時間30分前までに各SS到着できるスタート時間を設定</div></div><div class="ti-dl dl-g">4/3 夜</div></div>
+  </div>
+
+  <!-- 012 -->
+  <div class="sh"><div class="sh-txt">012 — LEG1取材ルート確定</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">012_01〜012_03</div><div class="ti-txt">SportityからLEG1スタートリスト.pdf取得→コマ図・写真振り分け・Media Limit時刻を1画面にまとめてLEG1 PDFを書き出す</div></div><div class="ti-dl dl-g">4/3 夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">012_04</div><div class="ti-txt">LEG2も同様に：コマ図・写真振り分け・Media Limit時刻を1画面にまとめてLEG2 PDFを書き出す</div></div><div class="ti-dl dl-g">4/3 夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">012_05〜012_06</div><div class="ti-txt">採用プラン確定・修正→コースカースケジュールから下記時刻を抽出してリマインダー登録（AppleWatchアラート）</div><div class="ti-sub">① Media Limit　② 00Car ST　③ 0Car ST　④ 1st Car ST　⑤ Sweeper ST　⑥ Sweeper Finish</div></div><div class="ti-dl dl-g">4/3 夜</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">012_07〜012_08</div><div class="ti-txt">採用プランでGoogleMapルート検索・保存→算出出発時間の1時間30分前にiPhoneアラームをセット</div></div><div class="ti-dl dl-g">4/3 夜</div></div>
+  </div>
+
+  <!-- 013 -->
+  <div class="sh"><div class="sh-txt">013 — LEG取材フロー（各SS繰り返し）</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">013_01</div><div class="ti-txt">ホテル出発時：012_06で保存したGoogleMapルートでナビ開始</div></div><div class="ti-dl dl-g">4/4朝</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">013_02〜013_03</div><div class="ti-txt">SSに到着→置きのビデオカメラを設置</div></div><div class="ti-dl dl-g">各SS</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">013_04</div><div class="ti-txt">メインのビデオカメラ設置→0Car通過→テスト撮影・アングル確認修正→1st Car撮影に備える</div></div><div class="ti-dl dl-g">各SS</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">013_05〜013_06</div><div class="ti-txt">1st Car撮影開始・継続撮影→最終Car撮影終了→片付け→Sweeperの通過を待つ</div></div><div class="ti-dl dl-g">各SS</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">013_07</div><div class="ti-txt">Sweeper通過後、次の撮影SSへGoogleMapでナビ開始（013_02〜繰り返し）</div></div><div class="ti-dl dl-g">各SS後</div></div>
+  </div>
+
+  <!-- 014 -->
+  <div class="sh"><div class="sh-txt">014 — ネット復帰後 即座確認</div><div class="sh-line"></div></div>
+
+  <!-- ネット復帰パネル -->
+  <div style="background:linear-gradient(135deg,rgba(0,200,232,.08),rgba(0,212,106,.05));border:2px solid var(--cyan);border-radius:8px;padding:12px;margin-bottom:10px">
+    <div style="font-family:var(--cond);font-size:16px;font-weight:800;color:var(--cyan);letter-spacing:.08em;margin-bottom:10px">
+      📡 ネット復帰後 この順番で確認
+    </div>
+
+    <!-- ① リザルト -->
+    <div style="margin-bottom:8px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">① まずリザルト確認</div>
+      <a href="https://timing.rallystream.net/live" target="_blank"
+        style="display:flex;align-items:center;gap:10px;background:rgba(0,200,232,.1);border:1px solid rgba(0,200,232,.3);border-radius:5px;padding:10px 12px;text-decoration:none">
+        <span style="font-size:20px">📡</span>
+        <div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--cyan);font-weight:700">timing.rallystream.net/live</div>
+          <div style="font-size:10px;color:var(--t1);margin-top:2px">各クラス上位3台＋タイム差を確認</div>
+        </div>
+        <div style="margin-left:auto;color:var(--cyan);font-size:14px">▶</div>
+      </a>
+    </div>
+
+    <!-- 見方 -->
+    <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:8px 10px;margin-bottom:8px;font-size:10px;line-height:1.9;color:var(--t1)">
+      <b style="color:var(--t0)">確認順（5〜6台走行後に確定）</b><br>
+      🔴 <b style="color:var(--red)">JN-1</b>：新井大輝・勝田・鎌田・奴田原・福永・新井敏弘<br>
+      🔵 <b style="color:var(--cyan)">JN-3/MCC</b>：小泉・奥井・最上<br>
+      🟠 <b style="color:var(--orange)">JN-4</b>：山本悠太・曽根・山口<br>
+      🟢 <b style="color:var(--green)">JN-5</b>：松倉・河本・阪口<br>
+      🟣 <b style="color:var(--purple)">JN-X</b>：天野・清水
+    </div>
+
+    <!-- ② Sportity -->
+    <div style="margin-bottom:8px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">② Sportity — 公式通知・新着確認</div>
+      <div style="background:rgba(136,104,232,.1);border:1px solid rgba(136,104,232,.3);border-radius:5px;padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--purple)">
+        Sportityアプリ → JRC2SR2026 → 新着通知を確認
+      </div>
+    </div>
+
+    <!-- ③ GoogleMap -->
+    <div style="margin-bottom:8px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">③ 次のSS/サービスへのルート確認</div>
+      <a href="https://maps.google.com" target="_blank"
+        style="display:flex;align-items:center;gap:10px;background:rgba(0,212,106,.08);border:1px solid rgba(0,212,106,.2);border-radius:5px;padding:10px 12px;text-decoration:none">
+        <span style="font-size:20px">🗺</span>
+        <div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--green);font-weight:700">GoogleMap を開く</div>
+          <div style="font-size:10px;color:var(--t1);margin-top:2px">次の目的地 → ナビ開始（スイーパー通過後）</div>
+        </div>
+        <div style="margin-left:auto;color:var(--green);font-size:14px">▶</div>
+      </a>
+    </div>
+
+    <!-- ④ 次のMediaLimit -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">④ 次のSS MediaLimit を確認</div>
+      <div style="background:rgba(232,168,0,.08);border:1px solid rgba(232,168,0,.2);border-radius:5px;padding:8px 12px;font-size:10px;color:var(--gold);line-height:1.8">
+        MediaLimit = その時刻までにSS内の撮影ポイント到着完了<br>
+        <b>目標 = MediaLimit の 1時間30分前にSSスタート通過</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEG1 MediaLimit早見 -->
+  <div style="margin-bottom:10px">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">LEG1（4/4）MediaLimit 早見表</div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:5px;overflow:hidden;font-size:10px">
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:5px 10px;background:var(--bg3);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:8px;color:var(--t2)">
+        <div>SS</div><div>コース</div><div>M.Limit</div><div>目標通過</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS1</div><div>TENZAN West</div><div style="font-family:var(--mono);color:var(--gold)">09:40</div><div style="font-family:var(--mono);color:var(--red);font-weight:700">08:10</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS2</div><div>TENZAN East</div><div style="font-family:var(--mono);color:var(--gold)">10:01</div><div style="font-family:var(--mono);color:var(--t1)">08:31</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS3</div><div>AMANOGAWA</div><div style="font-family:var(--mono);color:var(--gold)">10:39</div><div style="font-family:var(--mono);color:var(--t1)">09:09</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS4</div><div>TENZAN West</div><div style="font-family:var(--mono);color:var(--gold)">13:15</div><div style="font-family:var(--mono);color:var(--t1)">11:45</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS5</div><div>TENZAN East</div><div style="font-family:var(--mono);color:var(--gold)">13:36</div><div style="font-family:var(--mono);color:var(--t1)">12:06</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS6</div><div>AMANOGAWA</div><div style="font-family:var(--mono);color:var(--gold)">14:14</div><div style="font-family:var(--mono);color:var(--t1)">12:44</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEG2 MediaLimit早見 -->
+  <div style="margin-bottom:10px">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.1em;margin-bottom:4px">LEG2（4/5）MediaLimit 早見表</div>
+    <div style="background:var(--bg2);border:1px solid var(--line);border-radius:5px;overflow:hidden;font-size:10px">
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:5px 10px;background:var(--bg3);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:8px;color:var(--t2)">
+        <div>SS</div><div>コース</div><div>M.Limit</div><div>目標通過</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);background:rgba(232,40,30,.04);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS7</div><div>TENZAN Rev <span style="font-size:8px;color:var(--red)">⚠️逆走</span></div><div style="font-family:var(--mono);color:var(--gold)">07:33</div><div style="font-family:var(--mono);color:var(--red);font-weight:700">06:03</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);background:rgba(232,40,30,.04);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS8</div><div>AMANOGAWA Rev <span style="font-size:8px;color:var(--red)">⚠️逆走</span></div><div style="font-family:var(--mono);color:var(--gold)">07:56</div><div style="font-family:var(--mono);color:var(--red);font-weight:700">06:26</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS9</div><div>SSS TAKU</div><div style="font-family:var(--mono);color:var(--gold)">08:49</div><div style="font-family:var(--mono);color:var(--t1)">07:19</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS10</div><div>TENZAN Rev <span style="font-size:8px;color:var(--red)">⚠️逆走</span></div><div style="font-family:var(--mono);color:var(--gold)">10:58</div><div style="font-family:var(--mono);color:var(--t1)">09:28</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;border-bottom:1px solid rgba(28,40,48,.4);background:rgba(232,168,0,.04);align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--gold)">SS11</div><div>AMANOGAWA Rev ⭐ <span style="font-size:8px;color:var(--red)">⚠️逆走</span></div><div style="font-family:var(--mono);color:var(--gold)">11:21</div><div style="font-family:var(--mono);color:var(--t1)">09:51</div>
+      </div>
+      <div style="display:grid;grid-template-columns:44px 1fr 60px 72px;padding:6px 10px;align-items:center">
+        <div style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--red)">SS12</div><div>SSS TAKU</div><div style="font-family:var(--mono);color:var(--gold)">12:14</div><div style="font-family:var(--mono);color:var(--t1)">10:44</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 015 -->
+  <div class="sh"><div class="sh-txt">015 — インカー映像依頼（Facebook Messenger）</div><div class="sh-line"></div></div>
+  <div class="task-card">
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">015_01</div><div class="ti-txt">暫定表彰発表から30分後に正式順位が発表→SportityよりPDFダウンロード</div></div><div class="ti-dl dl-g">4/5夕</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">015_02</div><div class="ti-txt">インカー依頼対象選手をピックアップ</div><div class="ti-sub">JN-1：優勝・2位・3位　JN-3優勝　MCC優勝　JN-4優勝　JN-5優勝　JN-X優勝</div></div><div class="ti-dl dl-g">4/5夕</div></div>
+    <div class="ti" onclick="tog(this)"><div class="ti-chk"></div><div class="ti-body"><div class="ti-id">015_03</div><div class="ti-txt">TOOLSタブの「インカー依頼文」から各選手宛のメッセージを生成→Facebook Messengerで送信</div><div class="ti-sub">優勝→「おめでとうございます」　JN-1 2位・3位→「お疲れ様でした」　締切：水曜夜</div></div><div class="ti-dl dl-g">4/5夕</div></div>
+  </div>
+
+</div></div>
+
+<!-- ══ SS ══ -->
+<div class="page" id="p-ss"><div class="wrap">
+  <div class="sh"><div class="sh-txt">SAGA RALLY 2026 ITINERARY</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="ir"><div class="ir-k">HQ / サービス</div><div class="ir-v">TAQUA（多久市北多久町4644-1）</div></div>
+    <div class="ir"><div class="ir-k">メディアBF</div><div class="ir-v" style="color:var(--cyan)">4/3(金) 11:00〜　TAQUA多目的ホール</div></div>
+    <div class="ir"><div class="ir-k">メディア受付</div><div class="ir-v">4/3(金) 11:00〜11:30</div></div>
+    <div class="ir"><div class="ir-k">LEG1 スタート</div><div class="ir-v">4/4(土)</div></div>
+    <div class="ir"><div class="ir-k">LEG2 スタート</div><div class="ir-v">4/5(日)</div></div>
+    <div class="ir"><div class="ir-k">SS総距離</div><div class="ir-v" style="color:var(--gold)">102.14km / 12SS → <b>係数×1.2</b></div></div>
+  </div>
+
+  <div class="sh"><div class="sh-txt">LEG 1 — 4月4日（土）</div><div class="sh-line"></div></div>
+  <div class="ss-tbl">
+    <div class="ss-hdr"><div>SS</div><div>STAGE</div><div>1st Car</div><div>M.Limit</div><div>距離</div></div>
+    <div class="ss-row hl"><div class="ss-no">SS1</div><div class="ss-nm">TENZAN West 1<small>★ 必須撮影 | MP:A-1/A-2(途中入退不可)・B(途中入退不可)</small></div><div class="ss-t">10:48</div><div class="ss-lim">09:18</div><div class="ss-d">10.30</div></div>
+    <div class="ss-row"><div class="ss-no">SS2</div><div class="ss-nm">TENZAN East 1<small>MP:A(途中入退不可)</small></div><div class="ss-t">11:09</div><div class="ss-lim">09:39</div><div class="ss-d">7.18</div></div>
+    <div class="ss-row"><div class="ss-no">SS3</div><div class="ss-nm">AMANOGAWA 1<small>MP:A(途中入退不可)・B(農家小屋P)・C(途中入退不可)</small></div><div class="ss-t">11:47</div><div class="ss-lim">10:17</div><div class="ss-d">13.15</div></div>
+    <div class="svc-row">── Service A（TAQUA） 12:47〜13:17 ──</div>
+    <div class="ss-row"><div class="ss-no">SS4</div><div class="ss-nm">TENZAN West 2<small>MP:A-1/A-2・B(共に途中入退不可)</small></div><div class="ss-t">14:23</div><div class="ss-lim">12:53</div><div class="ss-d">10.30</div></div>
+    <div class="ss-row"><div class="ss-no">SS5</div><div class="ss-nm">TENZAN East 2<small>MP:A(途中入退不可)</small></div><div class="ss-t">14:44</div><div class="ss-lim">13:14</div><div class="ss-d">7.18</div></div>
+    <div class="ss-row"><div class="ss-no">SS6</div><div class="ss-nm">AMANOGAWA 2<small>MP:A・B・C(各途中入退不可)</small></div><div class="ss-t">15:22</div><div class="ss-lim">13:52</div><div class="ss-d">13.15</div></div>
+  </div>
+
+  <div class="sh"><div class="sh-txt">LEG 2 — 4月5日（日）</div><div class="sh-line"></div></div>
+  <div class="ss-tbl">
+    <div class="ss-hdr"><div>SS</div><div>STAGE</div><div>1st Car</div><div>M.Limit</div><div>距離</div></div>
+    <div class="ss-row"><div class="ss-no">SS7</div><div class="ss-nm">TENZAN West Rev.1<small style="color:var(--red)">⚠️SS1/4と逆方向</small><small>MP:A(途中入退不可)・B-1/B-2(途中入退不可)</small></div><div class="ss-t">8:41</div><div class="ss-lim">7:11</div><div class="ss-d">6.39</div></div>
+    <div class="ss-row"><div class="ss-no">SS8</div><div class="ss-nm">AMANOGAWA Rev.1<small style="color:var(--red)">⚠️SS3/6と逆方向</small></div><div class="ss-t">9:04</div><div class="ss-lim">7:34</div><div class="ss-d">13.17</div></div>
+    <div class="ss-row hl"><div class="ss-no">SS9</div><div class="ss-nm">SSS TAKU CP 1<small>※徒歩レッキ | MP:A(入退可)・B(入退不可) P=多久市体育センター駐車場</small></div><div class="ss-t">9:57</div><div class="ss-lim">8:27</div><div class="ss-d">0.88</div></div>
+    <div class="svc-row">── Service D（TAQUA） 10:09〜10:39 ──</div>
+    <div class="ss-row"><div class="ss-no">SS10</div><div class="ss-nm">TENZAN West Rev.2<small style="color:var(--red)">⚠️SS1/4と逆方向</small><small>MP:A・B-1/B-2(途中入退不可)</small></div><div class="ss-t">12:06</div><div class="ss-lim">10:36</div><div class="ss-d">6.39</div></div>
+    <div class="ss-row"><div class="ss-no">SS11</div><div class="ss-nm">AMANOGAWA Rev.2<small style="color:var(--gold)">⭐caos賞</small><small style="color:var(--red)">⚠️SS3/6と逆方向</small></div><div class="ss-t">12:29</div><div class="ss-lim">10:59</div><div class="ss-d">13.17</div></div>
+    <div class="ss-row hl"><div class="ss-no">SS12</div><div class="ss-nm">SSS TAKU CP 2<small>※徒歩レッキ | MP:A(入退可)・B(入退不可) P=多久市体育センター駐車場</small></div><div class="ss-t">13:22</div><div class="ss-lim">11:52</div><div class="ss-d">0.88</div></div>
+  </div>
+  <div style="font-size:10px;color:var(--t1);line-height:1.7;background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:10px 12px;margin-bottom:10px">
+    <b style="color:var(--t0)">M.Limit</b> = Media Latest ST時刻（この時刻の<b style="color:var(--red)">1時間30分前</b>までに各SS到着地点に到達すること）<br>
+    SS9/SS12は<b style="color:var(--purple)">徒歩レッキ</b>→指定駐車スペースに停めてから徒歩で確認<br>
+    <b style="color:var(--gold)">Sweeper通過後まで移動禁止</b>（逆走禁止ルール厳守）
+  </div>
+
+  <!-- 逆走禁止 恒久警告 -->
+  <div style="background:rgba(232,40,30,.08);border:2px solid var(--red);border-radius:6px;padding:12px;margin-bottom:10px">
+    <div style="font-family:var(--cond);font-size:15px;font-weight:800;color:var(--red);letter-spacing:.05em;margin-bottom:8px">🚫 絶対厳守 — 逆走禁止ルール</div>
+    <div style="font-size:11px;line-height:2;color:var(--t0)">
+      <b style="color:var(--red)">違反するとパス（タバード）没収 → 取材終了</b><br>
+      ① SS内は必ず<b style="color:var(--gold)">スタートから順走方向のみ</b>で移動<br>
+      ② 撮影後はゴール方向に抜ける<b>（来た道を戻ることは絶対禁止）</b><br>
+      ③ 移動はスイーパー通過後のみ<br>
+    </div>
+    <div style="margin-top:10px;padding:8px;background:rgba(0,0,0,.2);border-radius:4px;font-size:11px;line-height:1.9;color:var(--gold)">
+      <b>⚠️ SAGA 2026 特有の注意</b><br>
+      LEG1（SS1/2/3）とLEG2（SS7/8）は<b>同じコースを逆方向（Rev）で走行</b><br>
+      例）SS3 AMANOGAWA（→南西） ≠ SS8 AMANOGAWA Rev（←北東）<br>
+      同じSSでも<b>スタート位置・走行方向が逆転</b>する<br>
+      レキ時に必ず両方向のスタート位置を確認・GoogleMapにピン追加すること
+    </div>
+  </div>
+
+
+  <!-- MediaSafety メディアポイント詳細 -->
+  <div class="sh" style="margin-top:16px"><div class="sh-txt">📍 MediaSafety Ver.1.8 — メディアポイント一覧</div><div class="sh-line"></div></div>
+  <div style="font-size:10px;color:var(--t1);padding:7px 12px;background:rgba(136,104,232,.07);border:1px solid rgba(136,104,232,.25);border-radius:5px;margin-bottom:10px;line-height:1.8">
+    <b style="color:var(--purple)">共通ルール</b><br>
+    ✅ メディアポイント以外の撮影禁止<br>
+    🚨 00カー到着時はその場で待機・スイーパー通過後に移動<br>
+    🔴 タバード常時着用・SSへはスタートから進入・TCでパスチェック<br>
+    ⚠️ SS内は順走で移動（一部例外除く）
+  </div>
+
+  <!-- SS1/4 -->
+  <div class="card" style="margin-bottom:8px">
+    <div style="padding:6px 12px;background:rgba(232,40,30,.08);border-bottom:1px solid rgba(232,40,30,.2)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--red);font-weight:700">SS1/4 TENZAN West 1&2 — 10.30km</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS1: 9:40 / SS4: 13:15</div></div>
+    <div class="ir"><div class="ir-k">ポイントA-1/A-2</div><div class="ir-v" style="font-size:10px">距離5.55〜5.71km付近 / <b style="color:var(--red)">途中入退不可</b> / P:天山上宮</div></div>
+    <div class="ir"><div class="ir-k">ポイントB</div><div class="ir-v" style="font-size:10px">距離6.95〜7.18km付近 / <b style="color:var(--red)">途中入退不可</b> / P:RP3付近</div></div>
+  </div>
+
+  <!-- SS2/5 -->
+  <div class="card" style="margin-bottom:8px">
+    <div style="padding:6px 12px;background:rgba(0,200,232,.06);border-bottom:1px solid rgba(0,200,232,.15)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--cyan);font-weight:700">SS2/5 TENZAN East 1&2 — 7.18km</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS2: 10:01 / SS5: 13:36</div></div>
+    <div class="ir"><div class="ir-k">ポイントA</div><div class="ir-v" style="font-size:10px">距離4.42km付近（RP2） / <b style="color:var(--red)">途中入退不可</b></div></div>
+  </div>
+
+  <!-- SS3/6 -->
+  <div class="card" style="margin-bottom:8px">
+    <div style="padding:6px 12px;background:rgba(0,212,106,.05);border-bottom:1px solid rgba(0,212,106,.15)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--green);font-weight:700">SS3/6 AMANOGAWA 1&2 — 13.15km</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS3: 10:39 / SS6: 14:14</div></div>
+    <div class="ir"><div class="ir-k">ポイントA</div><div class="ir-v" style="font-size:10px">距離5.72km付近 / <b style="color:var(--red)">途中入退不可</b> / P:付近</div></div>
+    <div class="ir"><div class="ir-k">ポイントB-1/B-2</div><div class="ir-v" style="font-size:10px">距離6.25km付近 / <b style="color:var(--red)">途中入退不可</b> / <b>P:農家の小屋付近（ラジオと同じ）</b></div></div>
+    <div class="ir"><div class="ir-k">ポイントC</div><div class="ir-v" style="font-size:10px">距離10.98km付近 / <b style="color:var(--red)">途中入退不可</b></div></div>
+  </div>
+
+  <!-- SS7/10 -->
+  <div class="card" style="margin-bottom:8px">
+    <div style="padding:6px 12px;background:rgba(232,40,30,.08);border-bottom:1px solid rgba(232,40,30,.2)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--red);font-weight:700">SS7/10 TENZAN West Rev.1&2 — 6.39km</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS7: 7:33 / SS10: 10:58</div></div>
+    <div class="ir"><div class="ir-k">ポイントA</div><div class="ir-v" style="font-size:10px">距離3.55km付近（1B） / <b style="color:var(--red)">途中入退不可</b></div></div>
+    <div class="ir"><div class="ir-k">ポイントB-1/B-2</div><div class="ir-v" style="font-size:10px">距離5.05〜5.55km付近 / <b style="color:var(--red)">途中入退不可</b></div></div>
+  </div>
+
+  <!-- SS8/11 -->
+  <div class="card" style="margin-bottom:8px;border-color:rgba(232,168,0,.3)">
+    <div style="padding:6px 12px;background:rgba(232,168,0,.08);border-bottom:1px solid rgba(232,168,0,.2)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--gold);font-weight:700">SS8/11 AMANOGAWA Rev.1&2 — 13.17km ⭐BLUE BATTERY caos賞(SS11)</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS8: 7:56 / SS11: 11:21</div></div>
+    <div class="ir"><div class="ir-k">ポイントA</div><div class="ir-v" style="font-size:10px">距離1.55km付近（2A） / <b style="color:var(--red)">途中入退不可</b></div></div>
+    <div class="ir"><div class="ir-k">ポイントB-1/B-2</div><div class="ir-v" style="font-size:10px">距離6.93km付近（RP3） / <b style="color:var(--red)">途中入退不可</b> / <b>P:農家の小屋付近</b></div></div>
+    <div class="ir"><div class="ir-k">ポイントC</div><div class="ir-v" style="font-size:10px">距離7.47km付近 / <b style="color:var(--red)">途中入退不可</b></div></div>
+  </div>
+
+  <!-- SS9/12 -->
+  <div class="card" style="margin-bottom:8px">
+    <div style="padding:6px 12px;background:rgba(136,104,232,.07);border-bottom:1px solid rgba(136,104,232,.2)">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--purple);font-weight:700">SS9/12 SSS TAKU Central Park 1&2 — 0.88km ※徒歩レッキ</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">Media Limit</div><div class="ir-v">SS9: 8:49 / SS12: 12:14</div></div>
+    <div class="ir"><div class="ir-k">ポイントA</div><div class="ir-v" style="font-size:10px"><b style="color:var(--green)">途中入退可</b> / P:多久市体育センター駐車場</div></div>
+    <div class="ir"><div class="ir-k">ポイントB</div><div class="ir-v" style="font-size:10px"><b style="color:var(--red)">途中入退不可</b> / P:多久市体育センター駐車場（A/B共通）</div></div>
+  </div>
+
+  <!-- 緊急連絡先 -->
+  <div class="sh" style="margin-top:16px"><div class="sh-txt">🚨 緊急連絡先</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="ir"><div class="ir-k" style="color:var(--red)">競技長</div><div class="ir-v" style="color:var(--red)">加納 崇一 090-9480-6180</div></div>
+    <div class="ir"><div class="ir-k">副競技長</div><div class="ir-v" style="font-size:10px">嘉屋 賢二 090-8372-6889 / 北川 紗衣 090-9477-6465</div></div>
+    <div class="ir"><div class="ir-k">TENZAN W/Rev</div><div class="ir-v" style="font-size:10px">大屋 貴央 090-3892-9380</div></div>
+    <div class="ir"><div class="ir-k">TENZAN E/TAKU</div><div class="ir-v" style="font-size:10px">片伯部 亮由 080-1716-5521</div></div>
+    <div class="ir"><div class="ir-k">AMANOGAWA</div><div class="ir-v" style="font-size:10px">西辻 匡教 090-9596-7948</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--orange)">唐津赤十字病院</div><div class="ir-v" style="color:var(--orange)">0955-72-5111</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--orange)">公立佐賀中央病院</div><div class="ir-v" style="color:var(--orange)">0952-20-3400</div></div>
+    <div class="ir"><div class="ir-k">唐津警察署</div><div class="ir-v" style="font-size:10px">0955-72-2101</div></div>
+    <div class="ir"><div class="ir-k">多久消防署</div><div class="ir-v" style="font-size:10px">0952-75-2191</div></div>
+  </div>
+  <!-- 公式通知No.1 変更点サマリー -->
+  <div class="sh"><div class="sh-txt">第22条 賞典（公式通知No.1 改訂）</div><div class="sh-line"></div></div>
+  <div class="card" style="border-color:rgba(232,40,30,.4);margin-bottom:10px">
+    <div style="padding:6px 12px;background:rgba(232,40,30,.08);border-bottom:1px solid rgba(232,40,30,.2)">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:.08em">2026/3/17 公式通知No.1 特別規則書変更</span>
+    </div>
+    <div class="ir"><div class="ir-k" style="color:var(--red)">JN-1</div><div class="ir-v" style="font-size:10px">1〜3位 JAF楯・副賞　<b style="color:var(--gold)">4位 副賞</b>（旧：4〜6位）</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--cyan)">JN-3</div><div class="ir-v" style="font-size:10px">1〜3位 JAF楯・副賞　<b style="color:var(--gold)">4〜7位 副賞</b>（旧：4〜6位）</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--orange)">JN-4/5/X</div><div class="ir-v" style="font-size:10px">1〜3位 JAF楯・副賞のみ（4位以下の副賞は削除）</div></div>
+    <div class="ir"><div class="ir-k" style="color:var(--gold)">特別賞</div><div class="ir-v" style="font-size:10px">⭐ SS11 AMANOGAWA Rev.2 各クラストップ → BLUE BATTERY caos賞 金一封</div></div>
+    <div class="ir"><div class="ir-k">細則7</div><div class="ir-v" style="font-size:10px;color:var(--t2)"><s>SSS障害物ペナルティ（1か所5秒加算）</s> → <b>削除</b>（条文番号繰上げ）</div></div>
+  </div>
+
+  <!-- LIVE RESULT -->
+  <div class="sh"><div class="sh-txt">014 — LIVE RESULT参照</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div style="padding:8px 12px"><a href="https://timing.rallystream.net/live" target="_blank" style="display:block;background:rgba(0,200,232,.08);border:1px solid rgba(0,200,232,.2);border-radius:4px;padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--cyan);text-decoration:none">📡 timing.rallystream.net/live</a></div>
+    <div class="ir" style="flex-direction:column;gap:4px;align-items:flex-start">
+      <div class="ir-k" style="margin-bottom:2px">表の見方</div>
+      <div style="font-size:11px;line-height:1.8">
+        <span class="tag tag-b">Stage</span> 該当SSの走行タイム順位<br>
+        <span class="tag tag-o">Overall</span> 積算タイムでの総合順位<br>
+        <span class="tag tag-r">Diff</span> クラス1位からの差（括弧内は直前との差）
+      </div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ══ PLAYERS ══ -->
+<div class="page" id="p-players"><div class="wrap">
+
+  <!-- コドラ変更アラート -->
+  <div class="sh"><div class="sh-txt">⚡ 第1戦比 コ・ドライバー変更（5組）</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div style="padding:6px 10px 2px;background:var(--bg3);border-bottom:1px solid var(--line)">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.08em">三河湾→SAGA RALLY エントリー比較</span>
+    </div>
+    <div class="co-chg-row"><div class="co-no">29</div><div class="co-cls c3m">MCC</div><div class="co-body"><div class="co-dr">今橋 彩佳</div><div class="co-detail"><span class="co-old">中嶌 アンリ</span><span class="co-arr">→</span><span class="co-new">槻島 もも</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">32</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">山本 悠太</div><div class="co-detail"><span class="co-old">立久井 和子</span><span class="co-arr">→</span><span class="co-new">伊藤 祐哉</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">35</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">山口 清司</div><div class="co-detail"><span class="co-old">澤田 耕一</span><span class="co-arr">→</span><span class="co-new">丸山 晃助</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">38</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">下口 紘輝</div><div class="co-detail"><span class="co-old">前田 健吾</span><span class="co-arr">→</span><span class="co-new">小林 一貴</span></div></div></div>
+    <div class="co-chg-row" style="border-bottom:none"><div class="co-no">44</div><div class="co-cls c5">JN-5</div><div class="co-body"><div class="co-dr">山中 健志郎</div><div class="co-detail"><span class="co-old">鷹巣 恵鈴</span><span class="co-arr">→</span><span class="co-new">宇野 裕哉</span></div></div></div>
+  </div>
+
+  <!-- SAGA新規参加（三河湾不参加） -->
+  <div class="sh"><div class="sh-txt">SAGA新規参加（第1戦不参加）12組</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div style="padding:6px 10px 4px;background:var(--bg3);border-bottom:1px solid var(--line)">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.08em">三河湾に参加しておらず第2戦から初登場</span>
+    </div>
+    <div class="co-chg-row"><div class="co-no">7</div><div class="co-cls c1">JN-1</div><div class="co-body"><div class="co-dr">新井 敏弘（TOSHI ARAI）</div><div class="co-detail" style="color:var(--red)">⚡ 三河湾リタイヤ後に復帰 / 父vs息子対決</div></div></div>
+    <div class="co-chg-row"><div class="co-no">31</div><div class="co-cls c3m">MCC</div><div class="co-body"><div class="co-dr">宮本 大輝（HARU）</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：宮本 大輝　GR YARIS</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">34</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">上原 淳</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：漆戸 あゆみ　BRZ</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">36</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">黒原 康仁</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：松葉 謙介　スイフト</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">39</div><div class="co-cls c4">JN-4</div><div class="co-body"><div class="co-dr">鶴岡 雄次</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：山岸 典将　スイフト</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">43</div><div class="co-cls c5">JN-5</div><div class="co-body"><div class="co-dr">小川 剛</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：山本 祐也　ヤリス</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">46</div><div class="co-cls c5">JN-5</div><div class="co-body"><div class="co-dr">三苫 和義</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：中田 昌美　フィット</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">47</div><div class="co-cls c5">JN-5</div><div class="co-body"><div class="co-dr">高岡 威</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：大倉 瞳　ヤリス</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">48</div><div class="co-cls c5">JN-5</div><div class="co-body"><div class="co-dr">長島 令旺</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：宮西 怜　ヤリス</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">51</div><div class="co-cls cx">JN-X</div><div class="co-body"><div class="co-dr">海老原 孝敬</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：蔭山 恵　CR-Z</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">52</div><div class="co-cls cx">JN-X</div><div class="co-body"><div class="co-dr">泉 陽介</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：石田 一輝　アクア</span></div></div></div>
+    <div class="co-chg-row"><div class="co-no">54</div><div class="co-cls cx">JN-X</div><div class="co-body"><div class="co-dr">川中 天兵</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：河嶋 康史　アクア</span></div></div></div>
+    <div class="co-chg-row" style="border-bottom:none"><div class="co-no">55</div><div class="co-cls cx">JN-X</div><div class="co-body"><div class="co-dr">山北 研二</div><div class="co-detail"><span style="color:var(--t1)">コ・ドラ：鈴木 かおり　アクア</span></div></div></div>
+  </div>
+  <div class="sh"><div class="sh-txt">JN-1 注目選手（015対象）</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div class="plr" onclick="openPlayer('arai-h')"><div><div class="plr-no">2</div><div class="plr-cls c1">JN-1</div></div><div class="plr-info"><div class="plr-name">新井 大輝</div><div class="plr-sub">32歳 / GRヤリス Rally2 / 現チャンピオン</div><div class="plr-note">三河湾優勝 ★★★</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('katsuta')"><div><div class="plr-no">1</div><div class="plr-cls c1">JN-1</div></div><div class="plr-info"><div class="plr-name">勝田 範彦</div><div class="plr-sub">57歳 / GRヤリス Rally2 / 9回チャンピオン</div><div class="plr-note">三河湾2位 +4.6秒</div></div><div class="plr-r"><div class="plr-015">015:2位</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('arai-t')"><div><div class="plr-no">7</div><div class="plr-cls c1">JN-1</div></div><div class="plr-info"><div class="plr-name">新井 敏弘</div><div class="plr-sub">59歳 / SUBARU WRX S4 / 40年歴</div><div class="plr-note" style="color:var(--red)">⚡ 三河湾RTD復帰 / 父vs息子対決</div></div><div class="plr-r"><div class="plr-015" style="color:var(--t1)">注目</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('kamada')"><div><div class="plr-no">4</div><div class="plr-cls c1">JN-1</div></div><div class="plr-info"><div class="plr-name">鎌田 卓麻</div><div class="plr-sub">51歳 / Fabia Rally2 / 2014チャンピオン</div><div class="plr-note">三河湾3位 +32.0秒</div></div><div class="plr-r"><div class="plr-015">015:3位</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('nutahara')"><div><div class="plr-no">3</div><div class="plr-cls c1">JN-1</div></div><div class="plr-info"><div class="plr-name">奴田原 文雄</div><div class="plr-sub">62歳 / GRヤリス Rally2 / 11回チャンピオン</div><div class="plr-note">モンテカルロ日本人初V / 62歳現役</div></div><div class="plr-r"><div class="plr-015" style="color:var(--t1)">注目</div><div class="plr-arr">▶</div></div></div>
+  </div>
+  <div class="sh"><div class="sh-txt">JN-3 / MCC（015対象）</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div class="plr" onclick="openPlayer('koizumi')"><div><div class="plr-no">15</div><div class="plr-cls c3">JN-3</div></div><div class="plr-info"><div class="plr-name">小泉 敏志</div><div class="plr-sub">35歳 / DLクスコ GRヤリス</div><div class="plr-note">三河湾：全日本初優勝！「勝てそうで勝てなかった」男</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('okui')"><div><div class="plr-no">18</div><div class="plr-cls c3m">MCC</div></div><div class="plr-info"><div class="plr-name">奥井 優介</div><div class="plr-sub">26歳 / ジムカーナCP / ラリー1年目</div><div class="plr-note">SS15最上0.1秒差→最終SS10kmで逆転V</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('mogami')"><div><div class="plr-no">19</div><div class="plr-cls c3m">MCC</div></div><div class="plr-info"><div class="plr-name">最上 佳樹</div><div class="plr-sub">26歳 / ジムカーナCP / SS15まで首位</div><div class="plr-note" style="color:var(--red)">最終SSで逆転負け→リベンジ注目</div></div><div class="plr-r"><div class="plr-015" style="color:var(--t1)">注目</div><div class="plr-arr">▶</div></div></div>
+  </div>
+  <div class="sh"><div class="sh-txt">JN-4 / JN-5 / JN-X（015対象）</div><div class="sh-line"></div></div>
+  <div class="card">
+    <div class="plr" onclick="openPlayer('yamamoto')"><div><div class="plr-no">32</div><div class="plr-cls c4">JN-4</div></div><div class="plr-info"><div class="plr-name">山本 悠太</div><div class="plr-sub">35歳 / 4連覇中 / GR86</div><div class="plr-note">三河湾V / 新コドラ：伊藤祐哉（佐賀から）</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('matsukura')"><div><div class="plr-no">41</div><div class="plr-cls c5">JN-5</div></div><div class="plr-info"><div class="plr-name">松倉 拓郎</div><div class="plr-sub">45歳 / 2連覇 / DL LOVCAヤリス</div><div class="plr-note">25年河本に阻まれた3連覇への雪辱</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('amano')"><div><div class="plr-no">49</div><div class="plr-cls cx">JN-X</div></div><div class="plr-info"><div class="plr-name">天野 智之</div><div class="plr-sub">57歳 / JNX王者 / RAV4 PHEV</div><div class="plr-note">三河湾V</div></div><div class="plr-r"><div class="plr-015">015:優勝</div><div class="plr-arr">▶</div></div></div>
+    <div class="plr" onclick="openPlayer('shimizu')"><div><div class="plr-no">50</div><div class="plr-cls cx">JN-X</div></div><div class="plr-info"><div class="plr-name">清水 和夫</div><div class="plr-sub">72歳 / YARIS HEV / 元モタジャーナリスト</div><div class="plr-note">2024年に41年ぶり全日本V / 72歳現役</div></div><div class="plr-r"><div class="plr-015" style="color:var(--t1)">注目</div><div class="plr-arr">▶</div></div></div>
+  </div>
+
+  <!-- 完全エントリーリスト -->
+  <div class="sh"><div class="sh-txt">完全エントリーリスト — SAGA RALLY 2026</div><div class="sh-line"></div></div>
+
+  <!-- JN-1 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--red)">JN-1　9台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015"><div class="el-no">2</div><div class="el-dr">新井 大輝<span class="el-star">★</span></div><div class="el-co">坂井 理崇</div><div class="el-car">GRヤリス R2</div></div>
+    <div class="el-row el-015"><div class="el-no">1</div><div class="el-dr">勝田 範彦<span class="el-star">★</span></div><div class="el-co">保井 隆宏</div><div class="el-car">GRヤリス R2</div></div>
+    <div class="el-row"><div class="el-no">7</div><div class="el-dr">新井 敏弘</div><div class="el-co">安藤 裕一</div><div class="el-car">WRX S4</div></div>
+    <div class="el-row el-015"><div class="el-no">4</div><div class="el-dr">鎌田 卓麻<span class="el-star">★</span></div><div class="el-co">松本 優一</div><div class="el-car">Fabia R2</div></div>
+    <div class="el-row"><div class="el-no">3</div><div class="el-dr">奴田原 文雄</div><div class="el-co">東 駿吾</div><div class="el-car">GRヤリス R2</div></div>
+    <div class="el-row"><div class="el-no">5</div><div class="el-dr">福永 修</div><div class="el-co">齊田 美早子</div><div class="el-car">Fabia</div></div>
+    <div class="el-row"><div class="el-no">6</div><div class="el-dr">大竹 直生</div><div class="el-co">橋本 美咲</div><div class="el-car">GRヤリス R2</div></div>
+    <div class="el-row"><div class="el-no">8</div><div class="el-dr">松岡 孝典</div><div class="el-co">竹下 紀子</div><div class="el-car">GRヤリス JP4</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">9</div><div class="el-dr">石黒 一暢</div><div class="el-co">穴井 謙志郎</div><div class="el-car">GRヤリス</div></div>
+  </div>
+
+  <!-- JN-2 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--t2)">JN-2　1台（不成立の可能性）</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row" style="border-bottom:none;opacity:.6"><div class="el-no">10</div><div class="el-dr">相原 泰祐</div><div class="el-co">上原 あずみ</div><div class="el-car">コペン GR-S</div></div>
+  </div>
+
+  <!-- JN-3 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--cyan)">JN-3　7台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015"><div class="el-no">15</div><div class="el-dr">小泉 敏志<span class="el-star">★</span></div><div class="el-co">加勢 直毅</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">14</div><div class="el-dr">内藤 学武</div><div class="el-co">大高 徹也</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">11</div><div class="el-dr">山田 啓介</div><div class="el-co">藤井 俊樹</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">16</div><div class="el-dr">石川 昌平</div><div class="el-co">佐々木 翔</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">12</div><div class="el-dr">貝原 聖也</div><div class="el-co">西﨑 佳代子</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">13</div><div class="el-dr">大倉 聡</div><div class="el-co">豊田 耕司</div><div class="el-car">GR Yaris</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">17</div><div class="el-dr">徳尾 慶太郎</div><div class="el-co">枝光 展義</div><div class="el-car">GRヤリス</div></div>
+  </div>
+
+  <!-- JN-3 MCC -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--gold)">JN-3(MCC)　14台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015"><div class="el-no">18</div><div class="el-dr">奥井 優介<span class="el-star">★</span></div><div class="el-co">藤田 めぐみ</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">19</div><div class="el-dr">最上 佳樹</div><div class="el-co">小藤 桂一</div><div class="el-car">GR YARIS</div></div>
+    <div class="el-row el-changed"><div class="el-no">29</div><div class="el-dr">今橋 彩佳 <span class="el-chg">変更</span></div><div class="el-co el-co-new">槻島 もも<br><span class="el-co-old">← 中嶌 アンリ</span></div><div class="el-car">GR YARIS</div></div>
+    <div class="el-row"><div class="el-no">20</div><div class="el-dr">長尾 綱也</div><div class="el-co">尼子 祥一</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">21</div><div class="el-dr">米林 慶晃</div><div class="el-co">菅野 総一郎</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">22</div><div class="el-dr">岩堀 巧</div><div class="el-co">相原 貴浩</div><div class="el-car">GRYaris</div></div>
+    <div class="el-row"><div class="el-no">23</div><div class="el-dr">三枝 聖弥</div><div class="el-co">木村 裕介</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">24</div><div class="el-dr">松原 周勢</div><div class="el-co">市橋 真由子</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">25</div><div class="el-dr">山口 航平</div><div class="el-co">春日 美知子</div><div class="el-car">GR Yaris</div></div>
+    <div class="el-row"><div class="el-no">26</div><div class="el-dr">兼松 由奈</div><div class="el-co">山下 秀</div><div class="el-car">GRYaris</div></div>
+    <div class="el-row"><div class="el-no">27</div><div class="el-dr">平川 真子</div><div class="el-co">冨本 諒</div><div class="el-car">GR YARIS</div></div>
+    <div class="el-row"><div class="el-no">28</div><div class="el-dr">及川 紗利亜</div><div class="el-co">山本 磨美</div><div class="el-car">GRヤリス</div></div>
+    <div class="el-row"><div class="el-no">30</div><div class="el-dr">伊藤 はづき</div><div class="el-co">川名 賢</div><div class="el-car">GR Yaris</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">31</div><div class="el-dr">宮本 大輝(HARU)</div><div class="el-co">宮本 大輝</div><div class="el-car">GR YARIS</div></div>
+  </div>
+
+  <!-- JN-4 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--orange)">JN-4　9台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015 el-changed"><div class="el-no">32</div><div class="el-dr">山本 悠太<span class="el-star">★</span><span class="el-chg">変更</span></div><div class="el-co el-co-new">伊藤 祐哉<br><span class="el-co-old">← 立久井 和子</span></div><div class="el-car">GR86</div></div>
+    <div class="el-row"><div class="el-no">33</div><div class="el-dr">曽根 崇仁</div><div class="el-co">小川 由起</div><div class="el-car">GR86</div></div>
+    <div class="el-row el-changed"><div class="el-no">35</div><div class="el-dr">山口 清司 <span class="el-chg">変更</span></div><div class="el-co el-co-new">丸山 晃助<br><span class="el-co-old">← 澤田 耕一</span></div><div class="el-car">GR86</div></div>
+    <div class="el-row"><div class="el-no">34</div><div class="el-dr">上原 淳</div><div class="el-co">漆戸 あゆみ</div><div class="el-car">BRZ</div></div>
+    <div class="el-row"><div class="el-no">36</div><div class="el-dr">黒原 康仁</div><div class="el-co">松葉 謙介</div><div class="el-car">スイフト</div></div>
+    <div class="el-row"><div class="el-no">37</div><div class="el-dr">渡部 弘樹</div><div class="el-co">横山 慎太郎</div><div class="el-car">GR86</div></div>
+    <div class="el-row el-changed"><div class="el-no">38</div><div class="el-dr">下口 紘輝 <span class="el-chg">変更</span></div><div class="el-co el-co-new">小林 一貴<br><span class="el-co-old">← 前田 健吾</span></div><div class="el-car">GR86</div></div>
+    <div class="el-row"><div class="el-no">39</div><div class="el-dr">鶴岡 雄次</div><div class="el-co">山岸 典将</div><div class="el-car">スイフト</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">40</div><div class="el-dr">飯田 駆</div><div class="el-co">吉井 紗英</div><div class="el-car">スイフト</div></div>
+  </div>
+
+  <!-- JN-5 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--green)">JN-5　8台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015"><div class="el-no">41</div><div class="el-dr">松倉 拓郎<span class="el-star">★</span></div><div class="el-co">山田 真記子</div><div class="el-car">ヤリス</div></div>
+    <div class="el-row"><div class="el-no">42</div><div class="el-dr">阪口 知洋</div><div class="el-co">野口 智恵美</div><div class="el-car">マーチ</div></div>
+    <div class="el-row el-changed"><div class="el-no">44</div><div class="el-dr">山中 健志郎 <span class="el-chg">変更</span></div><div class="el-co el-co-new">宇野 裕哉<br><span class="el-co-old">← 鷹巣 恵鈴</span></div><div class="el-car">デミオ</div></div>
+    <div class="el-row"><div class="el-no">43</div><div class="el-dr">小川 剛</div><div class="el-co">山本 祐也</div><div class="el-car">ヤリス</div></div>
+    <div class="el-row"><div class="el-no">45</div><div class="el-dr">有川 大輔</div><div class="el-co">梶山 剛</div><div class="el-car">ヤリス</div></div>
+    <div class="el-row"><div class="el-no">46</div><div class="el-dr">三苫 和義</div><div class="el-co">中田 昌美</div><div class="el-car">フィット</div></div>
+    <div class="el-row"><div class="el-no">47</div><div class="el-dr">高岡 威</div><div class="el-co">大倉 瞳</div><div class="el-car">Yaris</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">48</div><div class="el-dr">長島 令旺</div><div class="el-co">宮西 怜</div><div class="el-car">ヤリス</div></div>
+  </div>
+
+  <!-- JN-X -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--purple)">JN-X　8台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row el-015"><div class="el-no">49</div><div class="el-dr">天野 智之<span class="el-star">★</span></div><div class="el-co">井上 裕紀子</div><div class="el-car">RAV4 PHEV</div></div>
+    <div class="el-row"><div class="el-no">50</div><div class="el-dr">清水 和夫</div><div class="el-co">黒木 美珠</div><div class="el-car">YARIS HEV</div></div>
+    <div class="el-row"><div class="el-no">51</div><div class="el-dr">海老原 孝敬</div><div class="el-co">蔭山 恵</div><div class="el-car">CR-Z</div></div>
+    <div class="el-row"><div class="el-no">52</div><div class="el-dr">泉 陽介</div><div class="el-co">石田 一輝</div><div class="el-car">アクア</div></div>
+    <div class="el-row"><div class="el-no">53</div><div class="el-dr">中西 昌人</div><div class="el-co">山村 浩三</div><div class="el-car">CR-Z</div></div>
+    <div class="el-row"><div class="el-no">54</div><div class="el-dr">川中 天兵</div><div class="el-co">河嶋 康史</div><div class="el-car">アクア</div></div>
+    <div class="el-row"><div class="el-no">55</div><div class="el-dr">山北 研二</div><div class="el-co">鈴木 かおり</div><div class="el-car">アクア</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">56</div><div class="el-dr">大塚 祐樹</div><div class="el-co">HANA</div><div class="el-car">ヤリスHV</div></div>
+  </div>
+
+  <!-- OP-1 -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt" style="color:var(--t2)">OP-1　3台</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="el-hdr"><div>No.</div><div>ドライバー</div><div>コ・ドライバー</div><div>車両</div></div>
+    <div class="el-row"><div class="el-no">57</div><div class="el-dr">高山 仁</div><div class="el-co">竹藪 英樹</div><div class="el-car">プジョー106</div></div>
+    <div class="el-row"><div class="el-no">58</div><div class="el-dr">いりえもん</div><div class="el-co">KAWA</div><div class="el-car">COLT</div></div>
+    <div class="el-row" style="border-bottom:none"><div class="el-no">59</div><div class="el-dr">国沢 光宏</div><div class="el-co">萩野 司</div><div class="el-car">ミライース</div></div>
+  </div>
+
+  <div class="notice">★ = 015インカー依頼対象　変更 = 第1戦比コ・ドライバー変更</div>
+
+</div></div>
+
+<!-- ══ RANK ══ -->
+<div class="page" id="p-rank"><div class="wrap">
+
+  <div class="sh"><div class="sh-txt">2026 シリーズポイントランキング</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:12px;padding:10px 12px">
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--t1);line-height:1.9">
+      <div>Rd.1 三河湾：<span style="color:var(--green)">×1.0</span>（舗装73km）</div>
+      <div>Rd.2 SAGA：<span style="color:var(--gold)">×1.2</span>（舗装102km）</div>
+      <div style="color:var(--t2)">Rd.3〜9：結果待ち</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);margin-top:6px;line-height:1.7">
+      基本得点：1位=20 / 2位=15 / 3位=12 / 4位=10 / 5位=8 / 6位=6 / 7位=4 / 8位=3
+    </div>
+  </div>
+
+  <!-- JN-1 -->
+  <div class="sh"><div class="sh-txt" style="color:var(--red)">JN-1</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">新井 大輝</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">勝田 範彦</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">鎌田 卓麻</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">奴田原 文雄</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">福永 修</div><div class="rk-pt">8</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">8</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">6</div><div class="rk-name">松岡 孝典</div><div class="rk-pt">6</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">6</div></div>
+  </div>
+
+  <!-- JN-3 -->
+  <div class="sh"><div class="sh-txt" style="color:var(--cyan)">JN-3</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">小泉 敏志</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">内藤 学武</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">山田 啓介</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">石川 昌平</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">貝原 聖也</div><div class="rk-pt">8</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">大倉 聡</div><div class="rk-pt">6</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">6</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">7</div><div class="rk-name">徳尾 慶太郎</div><div class="rk-pt">4</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">4</div></div>
+  </div>
+
+  <!-- MCC -->
+  <div class="sh"><div class="sh-txt" style="color:var(--gold)">JN-3(MCC)</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">奥井 優介</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">最上 佳樹</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">長尾 綱也</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">4</div><div class="rk-name">米林 慶晃</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+  </div>
+
+  <!-- JN-4 -->
+  <div class="sh"><div class="sh-txt" style="color:var(--orange)">JN-4</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">山本 悠太</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">曽根 崇仁</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">山口 清司</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">渡部 弘樹</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">下口 紘輝</div><div class="rk-pt">8</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">鶴岡 雄次</div><div class="rk-pt">6</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">6</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">7</div><div class="rk-name">飯田 駆</div><div class="rk-pt">4</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">4</div></div>
+  </div>
+
+  <!-- JN-5 -->
+  <div class="sh"><div class="sh-txt" style="color:var(--green)">JN-5</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">松倉 拓郎</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">阪口 知洋</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">有川 大輔</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">4</div><div class="rk-name">小川 剛</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+  </div>
+
+  <!-- JN-X -->
+  <div class="sh"><div class="sh-txt" style="color:var(--purple)">JN-X</div><div class="sh-line"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--t2);white-space:nowrap;margin-left:4px">1戦終了</div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>ドライバー</div><div>Rd.1</div><div>Rd.2</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">天野 智之</div><div class="rk-pt">20</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">清水 和夫</div><div class="rk-pt">15</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">海老原 孝敬</div><div class="rk-pt">12</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">泉 陽介</div><div class="rk-pt">10</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">中西 昌人</div><div class="rk-pt">8</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">川中 天兵</div><div class="rk-pt">6</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">6</div></div>
+    <div class="rk-row"><div class="rk-pos">7</div><div class="rk-name">山北 研二</div><div class="rk-pt">4</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">4</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">8</div><div class="rk-name">大塚 祐樹</div><div class="rk-pt">3</div><div class="rk-pt rk-tbd">─</div><div class="rk-total">3</div></div>
+  </div>
+
+  <div class="notice" style="margin-bottom:16px">Rd.2 SAGA RALLY 終了後に結果を入力して更新</div>
+
+  <!-- コ・ドライバー ランキング -->
+  <div class="sh" style="margin-top:8px"><div class="sh-txt">コ・ドライバー ポイントランキング</div><div class="sh-line"></div></div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--t2);line-height:1.7;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:5px">
+    ⚠️ コ・ドライバーはポイントを個人で積算。コドラ変更の場合は<b style="color:var(--gold)">各戦で乗った選手にそれぞれポイントが付与</b>される。<br>
+    JN-4：三河湾（立久井和子・澤田耕一・前田健吾）→ SAGA（伊藤祐哉・丸山晃助・小林一貴）で別集計。
+  </div>
+
+  <!-- コドラ JN-1 -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--red);font-size:11px">JN-1 コ・ドライバー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">坂井 理崇</div><div style="font-size:9px;color:var(--t2)">新井 大輝</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">保井 隆宏</div><div style="font-size:9px;color:var(--t2)">勝田 範彦</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">松本 優一</div><div style="font-size:9px;color:var(--t2)">鎌田 卓麻</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">東 駿吾</div><div style="font-size:9px;color:var(--t2)">奴田原 文雄</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">齊田 美早子</div><div style="font-size:9px;color:var(--t2)">福永 修</div><div class="rk-pt">8</div><div class="rk-total">8</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">6</div><div class="rk-name">竹下 紀子</div><div style="font-size:9px;color:var(--t2)">松岡 孝典</div><div class="rk-pt">6</div><div class="rk-total">6</div></div>
+  </div>
+
+  <!-- コドラ JN-3 -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--cyan);font-size:11px">JN-3 コ・ドライバー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">加勢 直毅</div><div style="font-size:9px;color:var(--t2)">小泉 敏志</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">大高 徹也</div><div style="font-size:9px;color:var(--t2)">内藤 学武</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">藤井 俊樹</div><div style="font-size:9px;color:var(--t2)">山田 啓介</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">佐々木 翔</div><div style="font-size:9px;color:var(--t2)">石川 昌平</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">西﨑 佳代子</div><div style="font-size:9px;color:var(--t2)">貝原 聖也</div><div class="rk-pt">8</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">豊田 耕司</div><div style="font-size:9px;color:var(--t2)">大倉 聡</div><div class="rk-pt">6</div><div class="rk-total">6</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">7</div><div class="rk-name">枝光 展義</div><div style="font-size:9px;color:var(--t2)">徳尾 慶太郎</div><div class="rk-pt">4</div><div class="rk-total">4</div></div>
+  </div>
+
+  <!-- コドラ MCC -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--gold);font-size:11px">MCC コ・ドライバー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">藤田 めぐみ</div><div style="font-size:9px;color:var(--t2)">奥井 優介</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">小藤 桂一</div><div style="font-size:9px;color:var(--t2)">最上 佳樹</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">尼子 祥一</div><div style="font-size:9px;color:var(--t2)">長尾 綱也</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">4</div><div class="rk-name">菅野 総一郎</div><div style="font-size:9px;color:var(--t2)">米林 慶晃</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+  </div>
+
+  <!-- コドラ JN-4 -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--orange);font-size:11px">JN-4 コ・ドライバー</div><div class="sh-line"></div></div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-bottom:6px;padding:5px 10px;background:rgba(232,168,0,.06);border:1px solid rgba(232,168,0,.2);border-radius:4px">
+    ⚠️ Rd.1（三河湾）と異なるコドラがRd.2（SAGA）に乗車
+  </div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">立久井 和子</div><div style="font-size:9px;color:var(--t2)">山本 悠太</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">小川 由起</div><div style="font-size:9px;color:var(--t2)">曽根 崇仁</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">澤田 耕一</div><div style="font-size:9px;color:var(--t2)">山口 清司</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">横山 慎太郎</div><div style="font-size:9px;color:var(--t2)">渡部 弘樹</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">前田 健吾</div><div style="font-size:9px;color:var(--t2)">下口 紘輝</div><div class="rk-pt">8</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">山岸 典将</div><div style="font-size:9px;color:var(--t2)">鶴岡 雄次</div><div class="rk-pt">6</div><div class="rk-total">6</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">7</div><div class="rk-name">吉井 紗英</div><div style="font-size:9px;color:var(--t2)">飯田 駆</div><div class="rk-pt">4</div><div class="rk-total">4</div></div>
+  </div>
+
+  <!-- コドラ JN-5 -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--green);font-size:11px">JN-5 コ・ドライバー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">山田 真記子</div><div style="font-size:9px;color:var(--t2)">松倉 拓郎</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">野口 智恵美</div><div style="font-size:9px;color:var(--t2)">阪口 知洋</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">梶山 剛</div><div style="font-size:9px;color:var(--t2)">有川 大輔</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">4</div><div class="rk-name">山本 祐也</div><div style="font-size:9px;color:var(--t2)">小川 剛</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+  </div>
+
+  <!-- コドラ JN-X -->
+  <div class="sh" style="margin-top:4px"><div class="sh-txt" style="color:var(--purple);font-size:11px">JN-X コ・ドライバー</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rk-hdr"><div>順位</div><div>コ・ドライバー</div><div style="font-size:7px">ドライバー</div><div>Rd.1</div><div>合計</div></div>
+    <div class="rk-row rk-1st"><div class="rk-pos">1</div><div class="rk-name">井上 裕紀子</div><div style="font-size:9px;color:var(--t2)">天野 智之</div><div class="rk-pt">20</div><div class="rk-total">20</div></div>
+    <div class="rk-row rk-2nd"><div class="rk-pos">2</div><div class="rk-name">黒木 美珠</div><div style="font-size:9px;color:var(--t2)">清水 和夫</div><div class="rk-pt">15</div><div class="rk-total">15</div></div>
+    <div class="rk-row rk-3rd"><div class="rk-pos">3</div><div class="rk-name">蔭山 恵</div><div style="font-size:9px;color:var(--t2)">海老原 孝敬</div><div class="rk-pt">12</div><div class="rk-total">12</div></div>
+    <div class="rk-row"><div class="rk-pos">4</div><div class="rk-name">石田 一輝</div><div style="font-size:9px;color:var(--t2)">泉 陽介</div><div class="rk-pt">10</div><div class="rk-total">10</div></div>
+    <div class="rk-row"><div class="rk-pos">5</div><div class="rk-name">山村 浩三</div><div style="font-size:9px;color:var(--t2)">中西 昌人</div><div class="rk-pt">8</div><div class="rk-total">8</div></div>
+    <div class="rk-row"><div class="rk-pos">6</div><div class="rk-name">河嶋 康史</div><div style="font-size:9px;color:var(--t2)">川中 天兵</div><div class="rk-pt">6</div><div class="rk-total">6</div></div>
+    <div class="rk-row"><div class="rk-pos">7</div><div class="rk-name">鈴木 かおり</div><div style="font-size:9px;color:var(--t2)">山北 研二</div><div class="rk-pt">4</div><div class="rk-total">4</div></div>
+    <div class="rk-row" style="border-bottom:none"><div class="rk-pos">8</div><div class="rk-name">HANA</div><div style="font-size:9px;color:var(--t2)">大塚 祐樹</div><div class="rk-pt">3</div><div class="rk-total">3</div></div>
+  </div>
+
+  <!-- 最大獲得可能ポイント（SAGA後の逆転可能性） -->
+  <div class="sh"><div class="sh-txt">Rd.2 SAGA 最大獲得ポイント</div><div class="sh-line"></div></div>
+  <div class="card" style="padding:10px 12px;margin-bottom:10px">
+    <div style="font-size:11px;line-height:2;color:var(--t1)">
+      1位 → <span style="color:var(--gold);font-family:var(--mono);font-weight:600">+24pt</span>（×1.2）　
+      2位 → <span style="font-family:var(--mono)">+18pt</span>　
+      3位 → <span style="font-family:var(--mono)">+14.4pt</span><br>
+      4位 → <span style="font-family:var(--mono)">+12pt</span>　
+      5位 → <span style="font-family:var(--mono)">+9.6pt</span>　
+      6位 → <span style="font-family:var(--mono)">+7.2pt</span><br>
+      7位 → <span style="font-family:var(--mono)">+4.8pt</span>　
+      8位 → <span style="font-family:var(--mono)">+3.6pt</span>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:8px;padding-top:8px;border-top:1px solid var(--line);line-height:1.7">
+      例）JN-1：Rd.1 2位 勝田（15pt）がRd.2で優勝（+24pt）すれば<br>
+      　　合計39pt → 新井（20pt）が3位以下なら逆転
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ══ RESULT ══ -->
+<div class="page" id="p-result"><div class="wrap">
+  <div class="sh"><div class="sh-txt">第1戦 三河湾2026 最終結果</div><div class="sh-line"></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls">JN-1</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">新井 大輝</div><div class="rcar">GRヤリス Rally2</div></div><div class="rtimes"><div class="rtime">51:28.2</div><div class="rdiff">優勝</div></div><div class="rincar" onclick="openIncar('新井','JN-1 優勝')">🎥</div></div>
+    <div class="rrow"><div class="rpos rp2">2</div><div><div class="rname">勝田 範彦</div><div class="rcar">GRヤリス Rally2</div></div><div class="rtimes"><div class="rtime">51:32.8</div><div class="rdiff">+4.6</div></div><div class="rincar" onclick="openIncar('勝田','JN-1 2位')">🎥</div></div>
+    <div class="rrow"><div class="rpos rp3">3</div><div><div class="rname">鎌田 卓麻</div><div class="rcar">Fabia Rally2</div></div><div class="rtimes"><div class="rtime">52:00.2</div><div class="rdiff">+32.0</div></div><div class="rincar" onclick="openIncar('鎌田','JN-1 3位')">🎥</div></div>
+    <div class="rrow"><div class="rpos" style="color:var(--t1);font-family:var(--cond);font-size:18px;font-weight:700;min-width:22px">4</div><div><div class="rname">奴田原 文雄</div><div class="rcar">GRヤリス Rally2</div></div><div class="rtimes"><div class="rtime">52:06.0</div><div class="rdiff">+37.8</div></div><div class="rincar" style="opacity:.3">🎥</div></div>
+    <div class="rrow" style="background:rgba(232,40,30,.03)"><div class="rpos" style="color:var(--t2);font-family:var(--cond);font-size:16px;font-weight:700;min-width:22px">RTD</div><div><div class="rname" style="color:var(--t1)">新井 敏弘</div><div class="rcar">SUBARU WRX S4</div></div><div class="rtimes"><div class="rdiff" style="color:var(--red)">TC2 メカトラ</div></div><div class="rincar" style="opacity:.3">🎥</div></div>
+  </div>
+  <div class="card" style="margin-bottom:10px"><div class="rc-hdr"><div class="rc-cls" style="color:var(--t2);font-size:11px">JN-2</div><div class="rc-st" style="color:var(--t2)">不成立（1台）→ JN-1に併合</div></div></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls" style="color:var(--cyan)">JN-3</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">小泉 敏志</div><div class="rcar">DLクスコ GRヤリス</div></div><div class="rtimes"><div class="rdiff" style="color:var(--gold)">全日本初優勝！</div></div><div class="rincar" onclick="openIncar('小泉','JN-3 優勝')">🎥</div></div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls" style="color:var(--gold)">MCC</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">奥井 優介</div><div class="rcar">CUSCO GRヤリス</div></div><div class="rtimes"><div class="rdiff">最終SS逆転V</div></div><div class="rincar" onclick="openIncar('奥井','MCC 優勝')">🎥</div></div>
+    <div class="rrow"><div class="rpos rp2">2</div><div><div class="rname">最上 佳樹</div><div class="rcar">FIT-EASY GRヤリス</div></div><div class="rtimes"><div class="rdiff" style="color:var(--red)">SS15首位→逆転負け</div></div><div class="rincar" style="opacity:.3">🎥</div></div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls" style="color:var(--orange)">JN-4</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">山本 悠太</div><div class="rcar">Sammy K-one GR86</div></div><div class="rtimes"><div class="rdiff">4連覇継続</div></div><div class="rincar" onclick="openIncar('山本','JN-4 優勝')">🎥</div></div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls" style="color:var(--green)">JN-5</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">松倉 拓郎</div><div class="rcar">DL LOVCAヤリス</div></div><div class="rtimes"><div class="rdiff">雪辱の開幕V</div></div><div class="rincar" onclick="openIncar('松倉','JN-5 優勝')">🎥</div></div>
+  </div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="rc-hdr"><div class="rc-cls" style="color:var(--purple)">JN-X</div><div class="rc-st" style="color:var(--green)">確定 ✓</div></div>
+    <div class="rrow"><div class="rpos rp1">1</div><div><div class="rname">天野 智之</div><div class="rcar">TRT DL RAV4 PHEV</div></div><div class="rtimes"><div class="rdiff">優勝</div></div><div class="rincar" onclick="openIncar('天野','JN-X 優勝')">🎥</div></div>
+  </div>
+  <div class="notice">🎥 タップでインカー映像依頼文を生成</div>
+</div></div>
+
+<!-- ══ TOOLS ══ -->
+<div class="page" id="p-tools"><div class="wrap" style="padding:8px 8px 80px">
+
+  <!-- ライブモードパネル -->
+  <div id="live-panel" style="margin-bottom:10px"></div>
+
+  <!-- ネット復帰後 即押しゾーン -->
+  <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.12em;margin:8px 0 6px;text-align:center">━━ ネット復帰後 即押し ━━</div>
+  <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:8px">
+
+    <!-- リザルトLIVE 最大ボタン -->
+    <a href="https://timing.rallystream.net/live" target="_blank"
+      style="display:flex;align-items:center;justify-content:center;gap:14px;
+        background:linear-gradient(135deg,#001a2a,#002a3a);
+        border:2px solid var(--cyan);border-radius:12px;
+        padding:22px 16px;text-decoration:none;
+        box-shadow:0 0 20px rgba(0,200,232,.2);
+        -webkit-tap-highlight-color:rgba(0,200,232,.3)">
+      <span style="font-size:44px;line-height:1">📡</span>
+      <div>
+        <div style="font-family:var(--cond);font-size:28px;font-weight:900;color:var(--cyan);letter-spacing:.05em;line-height:1">LIVE RESULT</div>
+        <div style="font-size:11px;color:var(--t1);margin-top:4px">timing.rallystream.net/live</div>
+      </div>
+    </a>
+
+    <!-- Sportity -->
+    <div onclick="openSD('sportity')"
+      style="display:flex;align-items:center;justify-content:center;gap:14px;
+        background:linear-gradient(135deg,#1a001a,#2a002a);
+        border:2px solid var(--purple);border-radius:12px;
+        padding:18px 16px;cursor:pointer;
+        -webkit-tap-highlight-color:rgba(136,104,232,.3)">
+      <span style="font-size:40px;line-height:1">📲</span>
+      <div>
+        <div style="font-family:var(--cond);font-size:24px;font-weight:900;color:var(--purple);letter-spacing:.05em;line-height:1">SPORTITY</div>
+        <div style="font-size:11px;color:var(--t1);margin-top:4px">JRC2SR2026 → 新着確認</div>
+      </div>
+    </div>
+
+    <!-- GoogleMap -->
+    <a href="https://maps.google.com" target="_blank"
+      style="display:flex;align-items:center;justify-content:center;gap:14px;
+        background:linear-gradient(135deg,#001a00,#002a00);
+        border:2px solid var(--green);border-radius:12px;
+        padding:18px 16px;text-decoration:none;
+        -webkit-tap-highlight-color:rgba(0,212,106,.3)">
+      <span style="font-size:40px;line-height:1">🗺</span>
+      <div>
+        <div style="font-family:var(--cond);font-size:24px;font-weight:900;color:var(--green);letter-spacing:.05em;line-height:1">GoogleMap</div>
+        <div style="font-size:11px;color:var(--t1);margin-top:4px">次のSSへナビ開始</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 区切り -->
+  <div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.12em;margin:12px 0 6px;text-align:center">━━ 取材ツール ━━</div>
+
+  <!-- 2列ボタン -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+
+    <div onclick="openM('incar')"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        background:var(--bg2);border:2px solid var(--red);border-radius:12px;
+        padding:20px 8px;cursor:pointer;gap:8px;
+        -webkit-tap-highlight-color:rgba(232,40,30,.3)">
+      <span style="font-size:36px">🎥</span>
+      <div style="font-family:var(--cond);font-size:18px;font-weight:800;color:var(--red);letter-spacing:.03em;text-align:center;line-height:1.2">インカー<br>依頼文</div>
+    </div>
+
+    <div onclick="openM('point')"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        background:var(--bg2);border:2px solid var(--gold);border-radius:12px;
+        padding:20px 8px;cursor:pointer;gap:8px;
+        -webkit-tap-highlight-color:rgba(232,168,0,.3)">
+      <span style="font-size:36px">🏆</span>
+      <div style="font-family:var(--cond);font-size:18px;font-weight:800;color:var(--gold);letter-spacing:.03em;text-align:center;line-height:1.2">ポイント<br>計算機</div>
+    </div>
+
+    <div onclick="openM('timing')"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        background:var(--bg2);border:2px solid var(--orange);border-radius:12px;
+        padding:20px 8px;cursor:pointer;gap:8px;
+        -webkit-tap-highlight-color:rgba(240,120,40,.3)">
+      <span style="font-size:36px">🕐</span>
+      <div style="font-family:var(--cond);font-size:18px;font-weight:800;color:var(--orange);letter-spacing:.03em;text-align:center;line-height:1.2">タイミング<br>チャート</div>
+    </div>
+
+    <div onclick="openM('info')"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        background:var(--bg2);border:2px solid var(--cyan);border-radius:12px;
+        padding:20px 8px;cursor:pointer;gap:8px;
+        -webkit-tap-highlight-color:rgba(0,200,232,.3)">
+      <span style="font-size:36px">📋</span>
+      <div style="font-family:var(--cond);font-size:18px;font-weight:800;color:var(--cyan);letter-spacing:.03em;text-align:center;line-height:1.2">KEY<br>INFO</div>
+    </div>
+
+    <div onclick="openM('email')"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+        background:var(--bg2);border:2px solid var(--t2);border-radius:12px;
+        padding:20px 8px;cursor:pointer;gap:8px;grid-column:1/-1;
+        -webkit-tap-highlight-color:rgba(68,80,88,.3)">
+      <span style="font-size:36px">✉️</span>
+      <div style="font-family:var(--cond);font-size:18px;font-weight:800;color:var(--t1);letter-spacing:.03em;text-align:center">申請メール作成</div>
+    </div>
+
+  </div>
+
+  <div class="sh"><div class="sh-txt">ポイント係数早見表（第2戦：×1.2適用）</div><div class="sh-line"></div></div>
+  <div class="card" style="padding:10px 12px">
+    <table class="pt-tbl">
+      <tr><th>順位</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th><th>5位</th><th>6位</th><th>7位</th><th>8位</th></tr>
+      <tr><td>×1.0</td><td>20</td><td>15</td><td>12</td><td>10</td><td>8</td><td>6</td><td>4</td><td>3</td></tr>
+      <tr class="hl"><td style="color:var(--gold)">×1.2</td><td>24</td><td>18</td><td>14.4</td><td>12</td><td>9.6</td><td>7.2</td><td>4.8</td><td>3.6</td></tr>
+      <tr><td>×1.5</td><td>30</td><td>22.5</td><td>18</td><td>15</td><td>12</td><td>9</td><td>6</td><td>4.5</td></tr>
+    </table>
+    <div style="font-size:10px;color:var(--t1);line-height:1.7;margin-top:6px">
+      ターマック 50〜100km未満→×1.0　100km以上→×1.2<br>
+      グラベル 50〜100km未満→×1.2　100km以上→×1.5<br>
+      短縮成立（SS総距離30km超＋審査委員会認定）→×0.8<br>
+      <span style="color:var(--gold)">第2戦SAGA：ターマック 102.14km → <b>係数×1.2</b></span><br>
+      詳細：<a href="https://www.jrca.gr.jp/guide/point" target="_blank" style="color:var(--cyan)">jrca.gr.jp/guide/point</a>
+    </div>
+  </div>
+</div></div>
+
+</div><!-- /body -->
+
+<nav class="nav">
+  <div class="ni on" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-home').classList.add('on');this.classList.add('on')"><div class="ni-ico">🏠</div><div class="ni-lbl">HOME</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-tasks').classList.add('on');this.classList.add('on')"><div class="ni-ico">📋</div><div class="ni-lbl">TASKS</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-ss').classList.add('on');this.classList.add('on')"><div class="ni-ico">🏁</div><div class="ni-lbl">SS</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-players').classList.add('on');this.classList.add('on')"><div class="ni-ico">🏎</div><div class="ni-lbl">選手</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-result').classList.add('on');this.classList.add('on')"><div class="ni-ico">📊</div><div class="ni-lbl">結果</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-rank').classList.add('on');this.classList.add('on')"><div class="ni-ico">🏆</div><div class="ni-lbl">RANK</div></div>
+  <div class="ni" onclick="document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on')});document.getElementById('p-tools').classList.add('on');this.classList.add('on')"><div class="ni-ico">⚡</div><div class="ni-lbl">TOOLS</div></div>
+</nav>
+
+<div class="overlay" id="ov" onclick="closeOv(event)">
+  <div class="sheet" id="sheet">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="mtitle"></div>
+    <div id="mcontent"></div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+/* LIVE MODE */
+const SS_SCHEDULE = [
+  // LEG1 4/4
+  {name:'SS1',course:'TENZAN West 1',start:'2026-04-04T10:48:00+09:00',sweeper:'2026-04-04T11:51:00+09:00',limit:'2026-04-04T09:40:00+09:00',dist:'10.30',leg:1},
+  {name:'SS2',course:'TENZAN East 1',start:'2026-04-04T11:09:00+09:00',sweeper:'2026-04-04T12:12:00+09:00',limit:'2026-04-04T10:01:00+09:00',dist:'7.18',leg:1},
+  {name:'SS3',course:'AMANOGAWA 1',start:'2026-04-04T11:47:00+09:00',sweeper:'2026-04-04T12:50:00+09:00',limit:'2026-04-04T10:39:00+09:00',dist:'13.15',leg:1},
+  {name:'SS4',course:'TENZAN West 2',start:'2026-04-04T14:23:00+09:00',sweeper:'2026-04-04T15:26:00+09:00',limit:'2026-04-04T13:15:00+09:00',dist:'10.30',leg:1},
+  {name:'SS5',course:'TENZAN East 2',start:'2026-04-04T14:44:00+09:00',sweeper:'2026-04-04T15:47:00+09:00',limit:'2026-04-04T13:36:00+09:00',dist:'7.18',leg:1},
+  {name:'SS6',course:'AMANOGAWA 2',start:'2026-04-04T15:22:00+09:00',sweeper:'2026-04-04T16:25:00+09:00',limit:'2026-04-04T14:14:00+09:00',dist:'13.15',leg:1},
+  // LEG2 4/5
+  {name:'SS7',course:'TENZAN West Rev.1 ⚠️逆走',start:'2026-04-05T08:41:00+09:00',sweeper:'2026-04-05T09:44:00+09:00',limit:'2026-04-05T07:33:00+09:00',dist:'6.39',leg:2},
+  {name:'SS8',course:'AMANOGAWA Rev.1 ⚠️逆走',start:'2026-04-05T09:04:00+09:00',sweeper:'2026-04-05T10:07:00+09:00',limit:'2026-04-05T07:56:00+09:00',dist:'13.17',leg:2},
+  {name:'SS9',course:'SSS TAKU CP 1',start:'2026-04-05T09:57:00+09:00',sweeper:'2026-04-05T11:00:00+09:00',limit:'2026-04-05T08:49:00+09:00',dist:'0.88',leg:2},
+  {name:'SS10',course:'TENZAN West Rev.2 ⚠️逆走',start:'2026-04-05T12:06:00+09:00',sweeper:'2026-04-05T13:09:00+09:00',limit:'2026-04-05T10:58:00+09:00',dist:'6.39',leg:2},
+  {name:'SS11',course:'AMANOGAWA Rev.2 ⭐caos賞 ⚠️逆走',start:'2026-04-05T12:29:00+09:00',sweeper:'2026-04-05T13:32:00+09:00',limit:'2026-04-05T11:21:00+09:00',dist:'13.17',leg:2},
+  {name:'SS12',course:'SSS TAKU CP 2',start:'2026-04-05T13:22:00+09:00',sweeper:'2026-04-05T14:25:00+09:00',limit:'2026-04-05T12:14:00+09:00',dist:'0.88',leg:2},
+];
+
+function getCurrentSS(){
+  const now = new Date();
+  for(let i=0;i<SS_SCHEDULE.length;i++){
+    const ss = SS_SCHEDULE[i];
+    const start = new Date(ss.start);
+    const sweeper = new Date(ss.sweeper);
+    const limit = new Date(ss.limit);
+    const limitMinus90 = new Date(limit.getTime() - 90*60*1000);
+    const next = SS_SCHEDULE[i+1];
+    if(now >= limitMinus90 && now < sweeper){
+      return {ss, mode: now < start ? 'waiting' : 'shooting', next};
+    }
+    if(now >= sweeper && next && new Date(new Date(next.limit).getTime()-90*60*1000) > now){
+      return {ss, mode:'moving', next};
+    }
+  }
+  return null;
+}
+
+function fmtTime(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function fmtDiff(ms){
+  const s=Math.floor(Math.abs(ms)/1000);
+  const m=Math.floor(s/60);const sec=s%60;
+  return (ms<0?'-':'')+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+
+function updateLivePanel(){
+  const panel = document.getElementById('live-panel');
+  if(!panel) return;
+  const cur = getCurrentSS();
+  if(!cur){panel.innerHTML='';return;}
+  const {ss, mode, next} = cur;
+  const now = new Date();
+  const start = new Date(ss.start);
+  const sweeper = new Date(ss.sweeper);
+  const limit = new Date(ss.limit);
+  const limitMinus90 = new Date(limit.getTime()-90*60*1000);
+
+  if(mode==='waiting'){
+    // 待機モード〜1st Carまで
+    const toLimit90 = limitMinus90 - now;
+    const toStart = start - now;
+    const urgent = toLimit90 < 0; // MediaLimit-90分を過ぎたら赤
+    panel.innerHTML=`
+      <div style="background:${urgent?'rgba(232,40,30,.15)':'rgba(232,168,0,.08)'};border:2px solid ${urgent?'var(--red)':'var(--gold)'};border-radius:12px;padding:14px;margin-bottom:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:${urgent?'var(--red)':'var(--gold)'}">🎬 ${ss.name} 待機中</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t1)">${ss.dist}km</div>
+        </div>
+        <div style="font-size:12px;color:var(--t0);margin-bottom:10px">${ss.course}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <div style="background:rgba(0,0,0,.3);border-radius:6px;padding:8px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t2);margin-bottom:2px">目標通過まで</div>
+            <div style="font-family:var(--cond);font-size:28px;font-weight:900;color:${urgent?'var(--red)':'var(--gold)'}" id="lp-t90">${fmtDiff(toLimit90)}</div>
+          </div>
+          <div style="background:rgba(0,0,0,.3);border-radius:6px;padding:8px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t2);margin-bottom:2px">1st Car STまで</div>
+            <div style="font-family:var(--cond);font-size:28px;font-weight:900;color:var(--t0)" id="lp-ts">${fmtDiff(toStart)}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-family:var(--mono);font-size:10px;text-align:center">
+          <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:4px"><div style="color:var(--t2);font-size:8px">M.Limit</div><div style="color:var(--gold)">${fmtTime(limit)}</div></div>
+          <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:4px"><div style="color:var(--t2);font-size:8px">1st Car</div><div style="color:var(--t0)">${fmtTime(start)}</div></div>
+          <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:4px"><div style="color:var(--t2);font-size:8px">Sweeper</div><div style="color:var(--t1)">${fmtTime(sweeper)}</div></div>
+        </div>
+      </div>`;
+  }
+  else if(mode==='shooting'){
+    // 撮影モード（1st Car〜Sweeper）
+    const elapsed = now - start;
+    const toSweeper = sweeper - now;
+    panel.innerHTML=`
+      <div style="background:rgba(232,40,30,.12);border:2px solid var(--red);border-radius:12px;padding:14px;margin-bottom:0;animation:pulse 1.5s infinite">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-family:var(--cond);font-size:26px;font-weight:900;color:var(--red)">🔴 ${ss.name} 撮影中</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t1)">${ss.dist}km</div>
+        </div>
+        <div style="font-size:12px;color:var(--t0);margin-bottom:10px">${ss.course}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <div style="background:rgba(0,0,0,.3);border-radius:6px;padding:8px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t2);margin-bottom:2px">経過時間</div>
+            <div style="font-family:var(--cond);font-size:32px;font-weight:900;color:var(--red)" id="lp-el">${fmtDiff(elapsed)}</div>
+          </div>
+          <div style="background:rgba(0,0,0,.3);border-radius:6px;padding:8px;text-align:center">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--t2);margin-bottom:2px">Sweeperまで</div>
+            <div style="font-family:var(--cond);font-size:32px;font-weight:900;color:var(--orange)" id="lp-sw">${fmtDiff(toSweeper)}</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,200,232,.08);border:1px solid rgba(0,200,232,.2);border-radius:6px;padding:8px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--cyan)">
+          Sweeper通過後に移動 — 逆走厳禁🚫
+        </div>
+      </div>`;
+  }
+  else if(mode==='moving'){
+    // 移動モード（Sweeper後〜次のSS）
+    panel.innerHTML=`
+      <div style="background:rgba(0,212,106,.08);border:2px solid var(--green);border-radius:12px;padding:14px;margin-bottom:0">
+        <div style="font-family:var(--cond);font-size:22px;font-weight:900;color:var(--green);margin-bottom:6px">✅ ${ss.name} 完了 → 移動中</div>
+        ${next?`
+        <div style="font-size:11px;color:var(--t1);margin-bottom:10px">次は <b style="color:var(--t0)">${next.name} ${next.course}</b></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;font-family:var(--mono);font-size:10px;text-align:center">
+          <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:6px"><div style="color:var(--t2);font-size:8px">M.Limit</div><div style="color:var(--gold);font-size:14px;font-weight:700">${fmtTime(new Date(next.limit))}</div></div>
+          <div style="background:rgba(0,0,0,.2);border-radius:4px;padding:6px"><div style="color:var(--t2);font-size:8px">1st Car</div><div style="color:var(--t0);font-size:14px;font-weight:700">${fmtTime(new Date(next.start))}</div></div>
+        </div>
+        <a href="https://maps.google.com" target="_blank"
+          style="display:flex;align-items:center;justify-content:center;gap:12px;
+            background:var(--green);border-radius:8px;padding:14px;
+            text-decoration:none;margin-bottom:0">
+          <span style="font-size:28px">🗺</span>
+          <span style="font-family:var(--cond);font-size:22px;font-weight:900;color:#000">GoogleMap でナビ開始</span>
+        </a>`:'<div style="color:var(--gold);text-align:center;font-size:14px">本日のSS全て完了！お疲れ様でした🏁</div>'}
+      </div>`;
+  }
+}
+
+/* CLOCK */
+function tick(){const n=new Date();document.getElementById('hclock').textContent=n.getFullYear()+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+tick();setInterval(tick,30000);
+
+/* COUNTDOWN */
+function cdTick(){const t=new Date('2026-04-04T10:00:00+09:00'),d=t-new Date();if(d<=0){['cd-d','cd-h','cd-m','cd-s'].forEach(i=>document.getElementById(i).textContent='00');return;}document.getElementById('cd-d').textContent=String(Math.floor(d/86400000)).padStart(2,'0');document.getElementById('cd-h').textContent=String(Math.floor(d%86400000/3600000)).padStart(2,'0');document.getElementById('cd-m').textContent=String(Math.floor(d%3600000/60000)).padStart(2,'0');document.getElementById('cd-s').textContent=String(Math.floor(d%60000/1000)).padStart(2,'0');}
+cdTick();setInterval(cdTick,1000);
+
+/* NAV */
+
+/* LIVE PANEL INIT */
+document.addEventListener('DOMContentLoaded', function(){
+  setInterval(updateLivePanel, 1000);
+  updateLivePanel();
+});
+
+/* TASK TOGGLE */
+function tog(el){el.classList.toggle('ck');const dl=el.querySelector('.ti-dl');if(!dl)return;if(el.classList.contains('ck')){dl.className='ti-dl dl-ok';dl.textContent='完了';}}
+
+/* MEDIASAFETY UNLOCK */
+function unlockMS(){document.querySelectorAll('.ti.locked').forEach(el=>{el.classList.remove('locked');const t=el.querySelector('.ti-txt');if(t)t.textContent=t.textContent.replace('🔒 ','');const dl=el.querySelector('.ti-dl');if(dl){dl.className='ti-dl dl-g';dl.textContent='今週中';}el.style.transition='background .4s';el.style.background='rgba(136,104,232,.06)';setTimeout(()=>el.style.background='',800);});const btn=document.getElementById('ms-btn');btn.textContent='✅ タスクアンロック済み';btn.className='ms-btn ms-done';btn.onclick=null;}
+
+/* PLAYER DATA */
+const PL={
+  'arai-h':{name:'新井 大輝',no:'No.2',cls:'JN-1',age:'32歳 / ラリー歴12年',car:'R2R×YAHAGI GR ヤリス Rally2',record:'2024全日本JN1チャンピオン\nラリージャパン2025 APRC優勝',result:'三河湾2026 優勝 51:28.2\n勝田との差：+4.6秒（極限の接戦）',note:'「日本のラリー人気復活」が目標\n筋トレが趣味の(サ)ラリーマン',o15:'JN-1 優勝'},
+  'katsuta':{name:'勝田 範彦',no:'No.1',cls:'JN-1',age:'57歳 / ラリー歴34年',car:'GR YARIS Rally2',record:'全日本ラリー9回チャンピオン\n自営業・愛知県出身',result:'三河湾2026 2位 51:32.8\n新井との差：わずか4.6秒',note:'「勝田貴元に勝つ！」が今季目標\nコドラ保井隆宏（21年歴）',o15:'JN-1 2位'},
+  'arai-t':{name:'新井 敏弘',no:'No.7 TOSHI ARAI',cls:'JN-1',age:'59歳 / ラリー歴40年',car:'SUBARU WRX S4',record:'全日本チャンピオン複数回\nスバル勢のシンボル',result:'三河湾2026：TC2でメカトラリタイヤ\nSAGA RALLYで雪辱の復帰！',note:'⚡ 父vs息子（新井大輝）の親子対決\n三河湾RTDからの復帰戦',o15:'（リタイヤのため対象外）'},
+  'kamada':{name:'鎌田 卓麻',no:'No.4',cls:'JN-1',age:'51歳 / ラリー歴33年',car:'Castrol TEIN DL Fabia Rally2',record:'2014年全日本チャンピオン\n2025 WRC RallyJapan WRC2マスターズ優勝',result:'三河湾2026 3位 52:00.2\n+32.0秒',note:'シュコダFabiaで異彩を放つ存在',o15:'JN-1 3位'},
+  'nutahara':{name:'奴田原 文雄',no:'No.3',cls:'JN-1',age:'62歳 / ラリー歴42年',car:'ADVAN KTMS GRヤリス Rally2',record:'全日本11回チャンピオン\n2006年モンテカルロ日本人初優勝',result:'三河湾2026 4位 52:06.0\n+37.8秒',note:'62歳でRally2参戦。レジェンド中のレジェンド',o15:'（JN-1 4位：依頼なし）'},
+  'koizumi':{name:'小泉 敏志',no:'No.15',cls:'JN-3',age:'35歳 / ラリー歴5年',car:'DLクスコ ドリームドライブ GRヤリス',record:'三河湾2025：2位\n「勝てそうで勝てなかった」ラリー5年目',result:'三河湾2026：全日本初優勝！\n横綱相撲で首位を守り切る',note:'悔しさを晴らした瞬間の映像を逃すな\nSAGAでの連勝に注目',o15:'JN-3 優勝'},
+  'okui':{name:'奥井 優介',no:'No.18',cls:'JN-3(MCC)',age:'26歳 / ジムカーナCP / ラリー1年目',car:'CUSCO GRG水戸けやき台 DL WMヤリス',record:'全日本ジムカーナ選手権チャンピオン\nラリー転向わずか1年目',result:'三河湾MCC優勝\nSS15まで最上に0.1秒差→最終SS10kmで逆転',note:'ジムカーナ技術がラリーでも炸裂\n最長SS10kmでの逆転劇は必見',o15:'MCC 優勝'},
+  'mogami':{name:'最上 佳樹',no:'No.19',cls:'JN-3(MCC)',age:'26歳 / ジムカーナCP / ラリー2年目',car:'FIT-EASY ZEAL GR YARIS',record:'全日本ジムカーナ選手権チャンピオン\n2025年最終戦ハイランドMCC優勝',result:'三河湾MCC：SS15首位\n最終SSで0.1秒差の逆転負け',note:'リベンジの一戦。奥井との再戦に注目',o15:'（2位：依頼なし）'},
+  'yamamoto':{name:'山本 悠太',no:'No.32',cls:'JN-4',age:'35歳 / ラリー歴10年',car:'Sammy愛知トヨタK-oneルブロスYH GR86',record:'2019/2023/2024/2025年チャンピオン（4連覇）',result:'三河湾2026 JN-4優勝\n貫録の走りで後続を寄せ付けず',note:'新コドラ：伊藤祐哉（佐賀から変更）\n5連覇への助走開始',o15:'JN-4 優勝'},
+  'matsukura':{name:'松倉 拓郎',no:'No.41',cls:'JN-5',age:'45歳 / ラリー歴17年',car:'DL☆Gセキネン鹿ソニックLOVCAヤリス',record:'2023/2024年JN-5チャンピオン（2連覇）\n2025年：河本拓也に阻まれ3連覇失敗',result:'三河湾2026 JN-5優勝\n雪辱の開幕V、再びシリーズ頂点へ',note:'「河本に奪われた3連覇への雪辱」\nそのドラマを映像で追いかけよ',o15:'JN-5 優勝'},
+  'amano':{name:'天野 智之',no:'No.49',cls:'JN-X',age:'57歳 / ラリー歴35年',car:'TRT DL RAV4 PHEV',record:'全日本ラリー クラスチャンピオン多数\n三河湾2025 JNX 1位',result:'三河湾2026 JN-X優勝',note:'RAV4 PHEVという異次元マシン\nJNX絶対王者',o15:'JN-X 優勝'},
+  'shimizu':{name:'清水 和夫',no:'No.50',cls:'JN-X',age:'72歳 / ラリー歴30年',car:'TCS YARIS HEV',record:'1983年全日本優勝\n2024年：41年ぶりの全日本優勝',result:'三河湾2026 JN-X参戦・完走',note:'72歳現役！元Motor Magazine編集長\nそのバイタリティがJRCA映像に映える',o15:'（優勝でなければ依頼なし）'}
+};
+
+function openPlayer(id){
+  const p=PL[id];if(!p)return;
+  document.getElementById('mtitle').textContent=p.name+' '+p.no;
+  document.getElementById('mcontent').innerHTML=`<div class="card" style="margin-bottom:10px"><div class="ir"><div class="ir-k">クラス</div><div class="ir-v" style="color:var(--red)">${p.cls}</div></div><div class="ir"><div class="ir-k">年齢/歴</div><div class="ir-v">${p.age}</div></div><div class="ir"><div class="ir-k">車両</div><div class="ir-v" style="font-size:10px">${p.car}</div></div></div><div style="background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:10px 12px;margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.08em;margin-bottom:5px">RECORD</div><div style="font-size:12px;line-height:1.7;white-space:pre-line">${p.record}</div></div><div style="background:rgba(232,168,0,.05);border:1px solid rgba(232,168,0,.2);border-radius:5px;padding:10px 12px;margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">三河湾2026 結果</div><div style="font-size:12px;line-height:1.7;white-space:pre-line">${p.result}</div></div><div style="background:var(--bg2);border:1px solid var(--line);border-radius:5px;padding:10px 12px;margin-bottom:12px"><div style="font-family:var(--mono);font-size:9px;color:var(--t2);letter-spacing:.08em;margin-bottom:5px">取材メモ</div><div style="font-size:12px;line-height:1.7;white-space:pre-line">${p.note}</div></div><div class="mbtns"><button class="btn-c" onclick="closeM()">閉じる</button><button class="btn-p" onclick="closeM();openIncar('${p.name.split(' ')[0]}','${p.o15}')">✉️ インカー依頼</button></div>`;
+  document.getElementById('ov').classList.add('on');
+}
+
+function openIncar(sn,cp){openM('incar',sn,cp);}
+
+function openM(type,sn='',cp=''){
+  let title='',html='';
+  if(type==='incar'){
+    title='インカー映像依頼文 (015)';
+    html=`<div class="mform"><label>選手名（名字）</label><input type="text" id="ic-n" value="${sn}" oninput="updI()"><label>クラス・順位</label><select id="ic-c" onchange="updI()"><option ${cp==='JN-1 優勝'?'selected':''}>JN-1 優勝</option><option ${cp==='JN-1 2位'?'selected':''}>JN-1 2位</option><option ${cp==='JN-1 3位'?'selected':''}>JN-1 3位</option><option ${cp==='JN-3 優勝'?'selected':''}>JN-3 優勝</option><option ${cp==='MCC 優勝'?'selected':''}>MCC 優勝</option><option ${cp==='JN-4 優勝'?'selected':''}>JN-4 優勝</option><option ${cp==='JN-5 優勝'?'selected':''}>JN-5 優勝</option><option ${cp==='JN-X 優勝'?'selected':''}>JN-X 優勝</option></select><label>メッセージ（コピーしてFacebook Messengerへ）</label><textarea id="ic-out" readonly></textarea></div><div class="mbtns"><button class="btn-c" onclick="closeM()">閉じる</button><button class="btn-p" onclick="cpT('ic-out')">📋 コピー</button></div><div class="copy-ok" id="copy-ok">✅ コピーしました</div>`;
+    document.getElementById('mtitle').textContent=title;document.getElementById('mcontent').innerHTML=html;document.getElementById('ov').classList.add('on');setTimeout(updI,30);return;
+  }
+  if(type==='point'){
+    title='ポイント計算機';
+    html=`<div class="mform"><label>順位</label><select id="pt-r"><option value="20">1位（基本20pt）</option><option value="15">2位（15pt）</option><option value="12">3位（12pt）</option><option value="10">4位（10pt）</option><option value="8">5位（8pt）</option><option value="6">6位（6pt）</option><option value="4">7位（4pt）</option><option value="3">8位（3pt）</option></select><label>係数</label><select id="pt-c"><option value="1.0">×1.0（ターマック 50〜100km未満）</option><option value="1.2" selected>×1.2（ターマック 100km以上 ← 第2戦SAGA）</option><option value="1.5">×1.5（グラベル 100km以上）</option><option value="0.8">×0.8（短縮成立）</option></select></div><div style="background:var(--bg3);border:1px solid var(--line2);border-radius:5px;padding:14px;text-align:center;margin-top:12px"><div style="font-family:var(--mono);font-size:11px;color:var(--t1);margin-bottom:4px">獲得ポイント</div><div id="pt-res" style="font-family:var(--cond);font-size:48px;font-weight:800;color:var(--gold);line-height:1">24</div><div style="font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:4px">pt</div></div><div class="mbtns single" style="margin-top:12px"><button class="btn-c" onclick="closeM()">閉じる</button></div>`;
+    document.getElementById('mtitle').textContent=title;document.getElementById('mcontent').innerHTML=html;document.getElementById('ov').classList.add('on');
+    setTimeout(()=>{const c=()=>{const r=parseFloat(document.getElementById('pt-r').value),k=parseFloat(document.getElementById('pt-c').value);document.getElementById('pt-res').textContent=(r*k).toFixed(1).replace('.0','');};document.getElementById('pt-r').onchange=c;document.getElementById('pt-c').onchange=c;c();},30);return;
+  }
+  if(type==='email'){
+    title='申請メール作成 (004_07)';
+    html=`<div class="mform"><label>イベント名</label><input type="text" value="YUHO Rally 飛鳥 2026" id="em-e" oninput="updE()"><label>生成メール（件名含む）</label><textarea id="em-out" readonly style="min-height:220px"></textarea></div><div class="mbtns"><button class="btn-c" onclick="closeM()">閉じる</button><button class="btn-p" onclick="cpT('em-out')">📋 コピー</button></div><div class="copy-ok" id="copy-ok">✅ コピーしました</div>`;
+    document.getElementById('mtitle').textContent=title;document.getElementById('mcontent').innerHTML=html;document.getElementById('ov').classList.add('on');setTimeout(updE,30);return;
+  }
+  if(type==='timing'){
+    title='タイミングチャート LEG2';
+    html=`<div class="card" style="margin:0 0 10px"><div class="ir"><div class="ir-k">SS7 1st Car</div><div class="ir-v">8:41</div></div><div class="ir"><div class="ir-k">SS8 1st Car</div><div class="ir-v">9:04</div></div><div class="ir"><div class="ir-k">SS9 SSS 1st Car</div><div class="ir-v">9:57</div></div><div class="ir"><div class="ir-k">Service D OUT</div><div class="ir-v" style="color:var(--cyan)">10:39</div></div><div class="ir"><div class="ir-k">SS10 1st Car</div><div class="ir-v">12:06</div></div><div class="ir"><div class="ir-k">SS11 1st Car</div><div class="ir-v">12:29</div></div><div class="ir"><div class="ir-k">SS12 SSS 1st Car</div><div class="ir-v">13:22</div></div><div class="ir"><div class="ir-k">Rally Finish（予定）</div><div class="ir-v" style="color:var(--gold)">13:39〜</div></div></div><div class="mbtns single"><button class="btn-c" onclick="closeM()">閉じる</button></div>`;
+  }
+  if(type==='info'){
+    title='KEY INFO — 第2戦';
+    html=`<div class="card" style="margin:0 0 10px"><div class="ir"><div class="ir-k">メディア受付</div><div class="ir-v">4/3(金) 11:00〜11:30</div></div><div class="ir"><div class="ir-k">ブリーフィング</div><div class="ir-v">4/3(金) 11:30〜12:30</div></div><div class="ir"><div class="ir-k">BF会場</div><div class="ir-v">TAQUA多目的ホール</div></div><div class="ir"><div class="ir-k">駐車場</div><div class="ir-v">ナインストーンGC</div></div><div class="ir"><div class="ir-k">メディア担当</div><div class="ir-v" style="color:var(--cyan)">media@jgr.jp</div></div><div class="ir"><div class="ir-k">アイテナリー</div><div class="ir-v" style="color:var(--green)">Ver4.4 反映済（公式通知No.1）</div></div><div class="ir"><div class="ir-k">Sportity</div><div class="ir-v">公式通知アプリ（常時確認）</div></div><div class="ir"><div class="ir-k">TRACKING</div><div class="ir-v">RallystreamTRACKING</div></div></div><div class="mbtns single"><button class="btn-c" onclick="closeM()">閉じる</button></div>`;
+  }
+  document.getElementById('mtitle').textContent=title;document.getElementById('mcontent').innerHTML=html;document.getElementById('ov').classList.add('on');
+}
+
+function updI(){
+  const n=document.getElementById('ic-n')?.value||'';
+  const c=document.getElementById('ic-c')?.value||'JN-1 優勝';
+  const isW=c.includes('優勝');
+  const g=isW?`SAGA RALLY 2026 優勝\nおめでとうございます`:`SAGA RALLY 2026\nお疲れ様でした`;
+  const o=document.getElementById('ic-out');
+  if(o)o.value=`${n} 様\n\nいつもJRCAビデオの制作でお世話になります、映像カメラマンの加藤です。\n\n${g}\n\n今回も、JRCA映像制作のためインカー映像を収集しております。\nご自身が「これを見せたい」と思う映像を1本でも構いませんので、\nGIGAファイル便等にアップロードのうえ、ダウンロードURLを\nこのメッセージへご返信ください。\n\n誠に恐れ入りますが、水曜日の夜までにお送りいただけますと\n大変助かります。\n\nご不明な点がございましたら、お気軽に加藤までご連絡ください。\nお疲れのところ恐縮ですが、何卒よろしくお願いいたします。\n\n――――――――――\n加藤 卓哉　映像制作\n080-3340-6813\nkatotaku7@t-k-product.com\n――――――――――`;
+}
+
+function updE(){
+  const e=document.getElementById('em-e')?.value||'';
+  const o=document.getElementById('em-out');
+  if(o)o.value=`件名：メディア登録申請 ${e}\n\nお世話になります。\n映像カメラマンの加藤卓哉と申します。\n\n2026年JAF全日本ラリー選手権第2戦\n「${e}」の\nメディア登録を申請いたします。\n\n【添付書類】\n・JGRメディア登録申請書\n・映像・写真の使用申請書\n・YouTube JRCA チャンネル PV実績\n・傷害保険証券写し\n\n何卒よろしくお願いいたします。\n\n加藤 卓哉\n080-3340-6813\nkatotaku7@t-k-product.com`;
+}
+
+function cpT(id){const t=document.getElementById(id);if(!t)return;navigator.clipboard?.writeText(t.value).then(()=>{const ok=document.getElementById('copy-ok');if(ok){ok.style.display='block';setTimeout(()=>ok.style.display='none',2000);}}).catch(()=>{t.select();document.execCommand('copy');});}
+function closeM(){document.getElementById('ov').classList.remove('on');}
+
+function openSD(type){
+  if(type==='sportity'){
+    document.getElementById('mtitle').textContent='Sportity — 公式通知確認';
+    document.getElementById('mcontent').innerHTML=`
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:60px;margin-bottom:12px">📲</div>
+        <div style="font-family:var(--cond);font-size:22px;font-weight:800;color:var(--purple);margin-bottom:8px">Sportityアプリを開く</div>
+        <div style="font-size:12px;color:var(--t1);margin-bottom:20px">コード：<span style="font-family:var(--mono);color:var(--gold);font-size:14px">JRC2SR2026</span></div>
+        <div style="font-size:11px;color:var(--t1);line-height:1.8;background:var(--bg3);border-radius:6px;padding:12px;text-align:left">
+          ✅ 新着PDFをダウンロード<br>
+          ✅ 公式通知・コース変更を確認<br>
+          ✅ スタートリストを確認
+        </div>
+      </div>
+      <div class="mbtns single" style="margin-top:14px"><button class="btn-c" onclick="closeM()">閉じる</button></div>`;
+    document.getElementById('ov').classList.add('on');
+  }
+}
+function closeOv(e){if(e.target===document.getElementById('ov'))closeM();}
+
+function rekiEnd(){
+  const btn=document.getElementById('reki-btn');
+  const done=document.getElementById('reki-done');
+  const task=document.getElementById('reki-task');
+  if(btn){btn.textContent='✅ レキ終了済み';btn.style.background='rgba(0,212,106,.12)';btn.style.borderColor='rgba(0,212,106,.3)';btn.style.pointerEvents='none';}
+  if(done){done.style.display='block';}
+  if(task){task.classList.add('ck');}
+}
+</script>
+</body>
+</html>
