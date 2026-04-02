@@ -1,1 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ナビタイマー</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #080c10 !important;
+    color: #fff;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+  }
 
+  .dest {
+    font-size: 18px;
+    font-weight: 700;
+    color: #c8d8e8;
+    letter-spacing: .06em;
+    margin-bottom: 2px;
+    text-align: center;
+  }
+  .dest-sub {
+    font-size: 12px;
+    color: #445566;
+    letter-spacing: .1em;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  /* メインタイマー */
+  .timer-wrap {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .timer-label {
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: #445566;
+    margin-bottom: 6px;
+  }
+  #main-timer {
+    font-size: clamp(80px, 24vw, 150px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+    line-height: 1;
+    transition: color .4s;
+  }
+  .green  { color: #00d46a; }
+  .blue   { color: #00b8ff; }
+  .red    { color: #e8281e; }
+  .gray   { color: #445566; }
+  .pulse  { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .status-badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 28px;
+  }
+  .badge-green { background: rgba(0,212,106,.15); color: #00d46a; border: 1px solid rgba(0,212,106,.3); }
+  .badge-blue  { background: rgba(0,184,255,.15); color: #00b8ff; border: 1px solid rgba(0,184,255,.3); }
+  .badge-red   { background: rgba(232,40,30,.15);  color: #e8281e; border: 1px solid rgba(232,40,30,.3); }
+  .badge-gray  { background: rgba(68,85,102,.15);  color: #667788; border: 1px solid rgba(68,85,102,.3); }
+
+  /* 情報カード */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .card-label { font-size: 10px; color: #445566; letter-spacing: .12em; margin-bottom: 4px; }
+  .card-val   { font-size: 22px; font-weight: 700; color: #c8d8e8; font-variant-numeric: tabular-nums; }
+  .card-unit  { font-size: 10px; color: #445566; margin-top: 2px; }
+
+  /* 締切バー */
+  .deadline-bar {
+    width: 100%;
+    max-width: 360px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .dl-left { font-size: 11px; color: #445566; letter-spacing: .1em; }
+  .dl-right { font-size: 20px; font-weight: 700; color: #e8c040; }
+
+  /* GPS状態 */
+  .gps-row {
+    font-size: 11px;
+    color: #334455;
+    letter-spacing: .08em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #gps-status { color: #556677; }
+
+  .now-time {
+    font-size: 12px;
+    color: #2a3a4a;
+    letter-spacing: .1em;
+    text-align: center;
+  }
+
+  /* GPS許可ボタン */
+  #gps-btn {
+    display: none;
+    margin: 12px auto 0;
+    background: rgba(0,184,255,.12);
+    border: 1px solid rgba(0,184,255,.3);
+    border-radius: 8px;
+    color: #00b8ff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 24px;
+    cursor: pointer;
+    letter-spacing: .08em;
+  }
+</style>
+</head>
+<body>
+
+<div class="dest">✈️ 羽田空港 保安検査場</div>
+<div class="dest-sub">JAL305 / 第1ターミナル 搭乗口8</div>
+
+<div class="timer-wrap">
+  <div class="timer-label">TARGET BUFFER（余裕時間）</div>
+  <div id="main-timer" class="green">--:--</div>
+</div>
+
+<div id="status-badge" class="status-badge badge-gray">GPS取得中...</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-label">現在地→目的地</div>
+    <div class="card-val" id="travel-time">--</div>
+    <div class="card-unit">分（推定）</div>
+  </div>
+  <div class="card">
+    <div class="card-label">ターゲットまで</div>
+    <div class="card-val" id="remaining">--</div>
+    <div class="card-unit">分</div>
+  </div>
+</div>
+
+<div class="deadline-bar">
+  <div class="dl-left">⏰ ターゲット着<br><span style="font-size:9px">保安検査締切15分前</span></div>
+  <div class="dl-right">06:30</div>
+</div>
+<div class="deadline-bar" style="border-color:rgba(232,40,30,.2)">
+  <div class="dl-left" style="color:#664433">🚨 保安検査 締切</div>
+  <div class="dl-right" style="color:#e8281e">06:45</div>
+</div>
+
+<div class="gps-row">📍 GPS: <span id="gps-status">取得中...</span></div>
+<button id="gps-btn" onclick="requestGPS()">📍 位置情報を許可する</button>
+<div class="now-time" id="now-time">現在時刻 --:--:--</div>
+
+<script>
+  // ターゲット時刻（JST）
+  const TARGET_H = 6, TARGET_M = 30; // 06:30
+  const DEADLINE_H = 6, DEADLINE_M = 45; // 06:45
+
+  // 目的地：羽田空港第1ターミナル
+  const DEST_LAT = 35.5494;
+  const DEST_LNG = 139.7798;
+
+  let travelMinutes = null; // GPSから計算した所要時間
+  let lastLat = null, lastLng = null;
+  let gpsInterval = null;
+
+  function pad(n){ return String(Math.floor(n)).padStart(2,'0'); }
+
+  // 直線距離から所要時間を推定（車・早朝）
+  // ハバーサイン公式
+  function calcTravelMin(lat, lng) {
+    const R = 6371;
+    const dLat = (DEST_LAT - lat) * Math.PI / 180;
+    const dLng = (DEST_LNG - lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 +
+              Math.cos(lat*Math.PI/180) * Math.cos(DEST_LAT*Math.PI/180) * Math.sin(dLng/2)**2;
+    const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); // km
+    // 早朝の車速度 約55km/h想定（高速利用）
+    const mins = (dist / 55) * 60;
+    // 最低15分（駐車・歩行込み）
+    return Math.max(mins + 15, 15);
+  }
+
+  function updateDisplay() {
+    const now = new Date();
+    document.getElementById('now-time').textContent =
+      '現在時刻 ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+
+    // ターゲットまでの残り分
+    const targetDate = new Date(now);
+    targetDate.setHours(TARGET_H, TARGET_M, 0, 0);
+    const remainMs = targetDate - now;
+    const remainMin = remainMs / 60000;
+
+    document.getElementById('remaining').textContent =
+      remainMin > 0 ? Math.floor(remainMin) : '過ぎた';
+
+    const timerEl = document.getElementById('main-timer');
+    const badgeEl = document.getElementById('status-badge');
+    const travelEl = document.getElementById('travel-time');
+
+    if(travelMinutes !== null) {
+      travelEl.textContent = Math.ceil(travelMinutes);
+      // バッファ = ターゲットまでの残り時間 - 所要時間
+      const bufferMin = remainMin - travelMinutes;
+      const bufAbs = Math.abs(bufferMin);
+      const bH = Math.floor(bufAbs / 60);
+      const bM = Math.floor(bufAbs % 60);
+      const bS = Math.floor((bufAbs * 60) % 60);
+
+      if(remainMin <= 0) {
+        timerEl.textContent = 'ARRIVED';
+        timerEl.className = 'gray';
+        badgeEl.textContent = '✅ 到着済み';
+        badgeEl.className = 'status-badge badge-gray';
+        return;
+      }
+
+      timerEl.textContent = pad(bH) + ':' + pad(bM) + ':' + pad(bS);
+
+      if(bufferMin > 10) {
+        // 余裕あり → 青（早め）
+        timerEl.className = 'blue';
+        badgeEl.textContent = '🔵 余裕あり +' + Math.floor(bufferMin) + '分';
+        badgeEl.className = 'status-badge badge-blue';
+      } else if(bufferMin >= -5) {
+        // ちょうどよい → 緑
+        timerEl.className = 'green';
+        badgeEl.textContent = '🟢 オンタイム';
+        badgeEl.className = 'status-badge badge-green';
+      } else {
+        // 遅れ → 赤点滅
+        timerEl.className = 'red pulse';
+        badgeEl.textContent = '🔴 遅れ ' + Math.ceil(-bufferMin) + '分オーバー';
+        badgeEl.className = 'status-badge badge-red';
+      }
+    } else {
+      // GPS未取得中はカウントダウンのみ
+      travelEl.textContent = '--';
+      if(remainMin > 0) {
+        const h = Math.floor(remainMin / 60);
+        const m = Math.floor(remainMin % 60);
+        const s = Math.floor((remainMin * 60) % 60);
+        timerEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+        timerEl.className = remainMin < 20 ? 'red pulse' : remainMin < 60 ? 'green' : 'blue';
+      } else {
+        timerEl.textContent = '-- : --';
+        timerEl.className = 'gray';
+      }
+    }
+  }
+
+  function onGPSSuccess(pos) {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    lastLat = lat; lastLng = lng;
+    travelMinutes = calcTravelMin(lat, lng);
+
+    const accuracy = Math.round(pos.coords.accuracy);
+    document.getElementById('gps-status').textContent =
+      '取得済み（精度 ±' + accuracy + 'm）';
+    document.getElementById('gps-status').style.color = '#00d46a';
+    document.getElementById('gps-btn').style.display = 'none';
+  }
+
+  function onGPSError(err) {
+    let msg = 'エラー';
+    if(err.code === 1) msg = '許可が必要です';
+    else if(err.code === 2) msg = '位置情報取得失敗';
+    else if(err.code === 3) msg = 'タイムアウト';
+    document.getElementById('gps-status').textContent = msg;
+    document.getElementById('gps-status').style.color = '#e8281e';
+    document.getElementById('gps-btn').style.display = 'block';
+  }
+
+  function requestGPS() {
+    if(!navigator.geolocation) {
+      document.getElementById('gps-status').textContent = '非対応ブラウザ';
+      return;
+    }
+    navigator.geolocation.watchPosition(onGPSSuccess, onGPSError, {
+      enableHighAccuracy: true,
+      maximumAge: 30000,
+      timeout: 15000
+    });
+  }
+
+  // 起動時にGPS要求
+  requestGPS();
+
+  // 毎秒更新
+  updateDisplay();
+  setInterval(updateDisplay, 1000);
+</script>
+</body>
+</html>
